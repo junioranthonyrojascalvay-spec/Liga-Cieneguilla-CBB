@@ -587,6 +587,5 @@ async function loadGameTeamOptions() {
     away.appendChild(awayOption);
   });
 }
-
 $("#gameCategory").addEventListener("change", loadGameTeamOptions);
 loadGameTeamOptions();
