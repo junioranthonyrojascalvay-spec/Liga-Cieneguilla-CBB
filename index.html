@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Liga Cieneguilla Basketball — Primer Torneo. Resultados, calendario, equipos, jugadores y estadísticas." />
+  <title>Liga Cieneguilla Basketball | 1.er Torneo</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700;800&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="site-header">
+    <div class="container nav-wrap">
+      <a class="brand" href="#inicio" aria-label="Liga Cieneguilla Basketball">
+        <img src="assets/logo-cieneguilla.jpg" alt="Logo Cieneguilla Basketball" />
+        <div><strong>CIENEGUILLA</strong><span>BASKETBALL</span></div>
+      </a>
+      <nav class="desktop-nav" aria-label="Navegación principal">
+        <a class="active" href="#inicio">Inicio</a>
+        <a href="#torneo">Torneo</a>
+        <a href="#categorias">Categorías</a>
+        <a href="#partidos">Partidos</a>
+        <a href="#estadisticas">Estadísticas</a>
+        <a href="#historia">Historia</a>
+      </nav>
+      <button class="menu-btn" id="menuBtn" aria-label="Abrir menú">☰</button>
+    </div>
+    <nav class="mobile-nav" id="mobileNav">
+      <a href="#inicio">Inicio</a><a href="#torneo">Torneo</a><a href="#categorias">Categorías</a><a href="#partidos">Partidos</a><a href="#estadisticas">Estadísticas</a><a href="#historia">Historia</a>
+    </nav>
+  </header>
+
+  <main>
+    <section class="hero" id="inicio">
+      <div class="hero-overlay"></div>
+      <div class="container hero-content">
+        <div class="eyebrow">PRIMER TORNEO • CIENEGUILLA</div>
+        <h1>LIGA CIENEGUILLA<br><span>BASKETBALL</span></h1>
+        <p>Más que un juego. Una nueva historia para el básquet de Cieneguilla.</p>
+        <div class="hero-actions"><a class="btn btn-red" href="#categorias">VER CATEGORÍAS <span>→</span></a><a class="btn btn-outline" href="#torneo">CONOCE EL TORNEO</a></div>
+      </div>
+      <div class="hero-mark">NUESTRA<br>LIGA<br>NUESTRA<br>GENTE</div>
+    </section>
+
+    <section class="quick-stats" id="torneo">
+      <div class="container stat-grid">
+        <div class="stat"><b>01</b><span>PRIMER<br>TORNEO</span></div>
+        <div class="stat"><b>04</b><span>CATEGORÍAS</span></div>
+        <div class="stat"><b>—</b><span>EQUIPOS<br>REGISTRADOS</span></div>
+        <div class="stat"><b>—</b><span>PARTIDOS<br>PROGRAMADOS</span></div>
+      </div>
+    </section>
+
+    <section class="section" id="categorias">
+      <div class="container">
+        <div class="section-heading"><div><span class="kicker">COMPETENCIA</span><h2>ELIGE TU CATEGORÍA</h2></div><p>El primer torneo comienza con cuatro categorías.</p></div>
+        <div class="category-grid">
+          <article class="category-card sub13"><div class="cat-number">01</div><span>FORMACIÓN</span><h3>SUB-13</h3><p>Calendario, equipos, resultados y estadísticas.</p><a href="#partidos">VER CATEGORÍA →</a></article>
+          <article class="category-card sub16"><div class="cat-number">02</div><span>COMPETITIVA</span><h3>SUB-16</h3><p>Todo el seguimiento de la competencia.</p><a href="#partidos">VER CATEGORÍA →</a></article>
+          <article class="category-card sub18"><div class="cat-number">03</div><span>JUVENIL</span><h3>SUB-18</h3><p>Partidos, posiciones y líderes de la categoría.</p><a href="#partidos">VER CATEGORÍA →</a></article>
+          <article class="category-card libre"><div class="cat-number">04</div><span>ABIERTA</span><h3>LIBRE</h3><p>La máxima intensidad del primer torneo.</p><a href="#partidos">VER CATEGORÍA →</a></article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section dark-section" id="partidos">
+      <div class="container">
+        <div class="section-heading light"><div><span class="kicker">PRÓXIMAMENTE</span><h2>PARTIDOS Y RESULTADOS</h2></div><button class="text-btn" onclick="showNotice('El calendario se habilitará cuando se registren los partidos.')">VER CALENDARIO →</button></div>
+        <div class="empty-grid">
+          <div class="empty-card"><span class="icon">📅</span><h3>Próximos partidos</h3><p>El calendario oficial aparecerá aquí.</p></div>
+          <div class="empty-card"><span class="icon">🏀</span><h3>Últimos resultados</h3><p>Los marcadores se publicarán después de cada fecha.</p></div>
+          <div class="empty-card"><span class="icon">🏆</span><h3>Tabla de posiciones</h3><p>Se actualizará automáticamente con los resultados.</p></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="estadisticas">
+      <div class="container">
+        <div class="section-heading"><div><span class="kicker">ESTADÍSTICAS</span><h2>LOS NÚMEROS DE LA LIGA</h2></div><p>Datos oficiales por categoría y temporada.</p></div>
+        <div class="stats-placeholder">
+          <div><strong>0</strong><span>Máximo anotador</span><small>Se actualizará durante el torneo</small></div>
+          <div><strong>0</strong><span>Triples</span><small>Estadística oficial</small></div>
+          <div><strong>0</strong><span>Rebotes</span><small>Estadística oficial</small></div>
+          <div><strong>0</strong><span>Asistencias</span><small>Estadística oficial</small></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="history-banner" id="historia"><div class="container history-inner"><div><span class="kicker">DESDE CERO</span><h2>LA HISTORIA<br>COMIENZA AQUÍ.</h2><p>Este primer torneo será el punto de partida del archivo histórico de la Liga Cieneguilla Basketball.</p></div><div class="history-badge"><b>1.º</b><span>TORNEO</span></div></div></section>
+
+    <section class="section contact-section"><div class="container contact-box"><div><span class="kicker">LIGA CIENEGUILLA</span><h2>¿LISTOS PARA HACER HISTORIA?</h2><p>La plataforma crecerá junto con la competencia.</p></div><a class="btn btn-red" href="mailto:contacto@ligacieneguilla.pe">CONTACTAR A LA LIGA →</a></div></section>
+  </main>
+
+  <footer class="footer"><div class="container footer-inner"><div class="brand"><img src="assets/logo-cieneguilla.jpg" alt="Logo" /><div><strong>CIENEGUILLA</strong><span>BASKETBALL</span></div></div><div class="footer-links"><a href="#inicio">Inicio</a><a href="#categorias">Categorías</a><a href="#partidos">Partidos</a><a href="#estadisticas">Estadísticas</a><a href="#historia">Historia</a></div><div class="copyright">© <span id="year"></span> Liga Cieneguilla Basketball</div></div></footer>
+
+  <div class="toast" id="toast"></div>
+  <script src="script.js"></script>
+</body>
+</html>
