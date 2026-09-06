@@ -552,3 +552,41 @@ if (db) {
 ========================= */
 
 showSession();
+
+async function loadGameTeamOptions() {
+  const category = $("#gameCategory").value;
+  const home = $("#homeTeam");
+  const away = $("#awayTeam");
+
+  home.innerHTML = '<option value="">Selecciona equipo local</option>';
+  away.innerHTML = '<option value="">Selecciona equipo visitante</option>';
+
+  if (!category) return;
+
+  const { data, error } = await db
+    .from("teams")
+    .select("name")
+    .eq("category", category)
+    .order("name");
+
+  if (error) {
+    console.error("Error cargando equipos:", error);
+    return;
+  }
+
+  (data || []).forEach((team) => {
+    const homeOption = document.createElement("option");
+    homeOption.value = team.name;
+    homeOption.textContent = team.name;
+
+    const awayOption = document.createElement("option");
+    awayOption.value = team.name;
+    awayOption.textContent = team.name;
+
+    home.appendChild(homeOption);
+    away.appendChild(awayOption);
+  });
+}
+
+$("#gameCategory").addEventListener("change", loadGameTeamOptions);
+loadGameTeamOptions();
