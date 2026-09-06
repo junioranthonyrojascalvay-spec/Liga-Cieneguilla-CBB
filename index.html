@@ -1,40 +1,443 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="Liga Cieneguilla Basketball — Primer Torneo. Resultados, calendario, equipos, jugadores y estadísticas." />
-  <title>Liga Cieneguilla Basketball | 1.er Torneo</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700;800&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css" />
-</head>
-<body>
-  <header class="site-header">
-    <div class="container nav-wrap">
-      <a class="brand" href="#inicio" aria-label="Liga Cieneguilla Basketball">
-        <img src="assets/logo-cieneguilla.jpg" alt="Logo Cieneguilla Basketball" />
-        <div><strong>CIENEGUILLA</strong><span>BASKETBALL</span></div>
-      </a>
-      <nav class="desktop-nav" aria-label="Navegación principal">
-        <a class="active" href="#inicio">Inicio</a>
-        <a href="#torneo">Torneo</a>
-        <a href="#categorias">Categorías</a>
-        <a href="#partidos">Partidos</a>
-        <a href="#estadisticas">Estadísticas</a>
-        <a href="#historia">Historia</a>
-      </nav>
-      <button class="menu-btn" id="menuBtn" aria-label="Abrir menú">☰</button>
-    </div>
-    <nav class="mobile-nav" id="mobileNav">
-      <a href="#inicio">Inicio</a><a href="#torneo">Torneo</a><a href="#categorias">Categorías</a><a href="#partidos">Partidos</a><a href="#estadisticas">Estadísticas</a><a href="#historia">Historia</a>
-    </nav>
-  </header>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <main>
-    <section class="hero" id="inicio">
-      <div class="hero-overlay"></div>
+  <title>Liga Cieneguilla Basketball</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: Arial, sans-serif;
+      background: #080808;
+      color: white;
+    }
+
+    header {
+      background: linear-gradient(135deg, #111, #222);
+      padding: 30px 20px;
+      text-align: center;
+      border-bottom: 3px solid #7c3aed;
+    }
+
+    header h1 {
+      font-size: 32px;
+      margin-bottom: 8px;
+    }
+
+    header p {
+      color: #bbb;
+    }
+
+    nav {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      padding: 18px;
+      background: #101010;
+    }
+
+    nav button {
+      background: #222;
+      color: white;
+      border: 1px solid #444;
+      padding: 12px 18px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    nav button:hover,
+    nav button.active {
+      background: #7c3aed;
+      border-color: #7c3aed;
+    }
+
+    main {
+      width: 95%;
+      max-width: 1100px;
+      margin: 30px auto;
+    }
+
+    .section {
+      background: #121212;
+      border: 1px solid #292929;
+      border-radius: 14px;
+      padding: 20px;
+      margin-bottom: 25px;
+    }
+
+    .section h2 {
+      margin-bottom: 18px;
+      color: #a78bfa;
+    }
+
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 15px;
+    }
+
+    .card {
+      background: #1c1c1c;
+      border: 1px solid #303030;
+      border-radius: 12px;
+      padding: 18px;
+    }
+
+    .card h3 {
+      margin-bottom: 10px;
+    }
+
+    .status {
+      color: #22c55e;
+      font-weight: bold;
+    }
+
+    .table-container {
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 600px;
+    }
+
+    th,
+    td {
+      padding: 12px;
+      text-align: center;
+      border-bottom: 1px solid #303030;
+    }
+
+    th {
+      background: #202020;
+      color: #a78bfa;
+    }
+
+    tr:hover {
+      background: #1c1c1c;
+    }
+
+    .loading {
+      text-align: center;
+      color: #aaa;
+      padding: 20px;
+    }
+
+    .error {
+      background: #3f1515;
+      color: #ffb4b4;
+      padding: 15px;
+      border-radius: 8px;
+    }
+
+    footer {
+      text-align: center;
+      padding: 30px;
+      color: #777;
+      border-top: 1px solid #222;
+      margin-top: 40px;
+    }
+
+    @media (max-width: 600px) {
+      header h1 {
+        font-size: 25px;
+      }
+
+      main {
+        width: 92%;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+<header>
+  <h1>🏀 Liga Cieneguilla Basketball</h1>
+  <p>Resultados • Partidos • Tabla de posiciones</p>
+</header>
+
+<nav>
+  <button class="active" onclick="mostrarCategoria('Todas', this)">
+    Todas
+  </button>
+
+  <button onclick="mostrarCategoria('Sub-13', this)">
+    Sub-13
+  </button>
+
+  <button onclick="mostrarCategoria('Sub-16', this)">
+    Sub-16
+  </button>
+
+  <button onclick="mostrarCategoria('Sub-18', this)">
+    Sub-18
+  </button>
+
+  <button onclick="mostrarCategoria('Libre', this)">
+    Libre
+  </button>
+</nav>
+
+<main>
+
+  <section class="section">
+    <h2>📊 Tabla de posiciones</h2>
+
+    <div class="table-container">
+      <table>
+        <thead>
+          <tr>
+            <th>Pos.</th>
+            <th>Equipo</th>
+            <th>PJ</th>
+            <th>PG</th>
+            <th>PP</th>
+            <th>PF</th>
+            <th>PC</th>
+            <th>PTS</th>
+          </tr>
+        </thead>
+
+        <tbody id="tabla">
+          <tr>
+            <td colspan="8" class="loading">
+              Cargando posiciones...
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="section">
+    <h2>🏀 Próximos partidos</h2>
+
+    <div id="partidos" class="cards">
+      <div class="loading">
+        Cargando partidos...
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <h2>🔥 Últimos resultados</h2>
+
+    <div id="resultados" class="cards">
+      <div class="loading">
+        Cargando resultados...
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  Liga Cieneguilla Basketball © 2026
+</footer>
+
+<script>
+  /*
+    ================================
+    CONFIGURACIÓN DE SUPABASE
+    ================================
+
+    URL de tu proyecto:
+    https://uzarickotriainvjjjla.supabase.co
+
+    AQUÍ DESPUÉS PONDREMOS TU CLAVE PÚBLICA.
+  */
+
+  const SUPABASE_URL =
+    "https://uzarickotriainvjjjla.supabase.co";
+
+  const SUPABASE_ANON_KEY =
+    "PONER_AQUI_TU_CLAVE_PUBLICA";
+
+
+  let categoriaActual = "Todas";
+
+
+  function mostrarCategoria(categoria, boton) {
+
+    categoriaActual = categoria;
+
+    document.querySelectorAll("nav button")
+      .forEach(btn => btn.classList.remove("active"));
+
+    boton.classList.add("active");
+
+    cargarDatos();
+  }
+
+
+  async function consultar(tabla) {
+
+    const url =
+      `${SUPABASE_URL}/rest/v1/${tabla}?select=*`;
+
+    const respuesta = await fetch(url, {
+      headers: {
+        "apikey": SUPABASE_ANON_KEY,
+        "Authorization":
+          `Bearer ${SUPABASE_ANON_KEY}`
+      }
+    });
+
+    if (!respuesta.ok) {
+      throw new Error(
+        `Error consultando ${tabla}: ${respuesta.status}`
+      );
+    }
+
+    return await respuesta.json();
+  }
+
+
+  async function cargarDatos() {
+
+    try {
+
+      const standings = await consultar("standings");
+
+      mostrarTabla(standings);
+
+    } catch (error) {
+
+      document.getElementById("tabla").innerHTML = `
+        <tr>
+          <td colspan="8">
+            <div class="error">
+              No se pudieron cargar las posiciones.
+            </div>
+          </td>
+        </tr>
+      `;
+
+      console.error(error);
+    }
+
+
+    /*
+      Los partidos se conectarán cuando
+      tengamos confirmados los nombres
+      de las tablas de partidos.
+    */
+
+    document.getElementById("partidos").innerHTML = `
+      <div class="card">
+        <h3>Próximamente</h3>
+        <p>Los próximos partidos aparecerán aquí.</p>
+      </div>
+    `;
+
+    document.getElementById("resultados").innerHTML = `
+      <div class="card">
+        <h3>Próximamente</h3>
+        <p>Los resultados aparecerán aquí.</p>
+      </div>
+    `;
+  }
+
+
+  function mostrarTabla(datos) {
+
+    const tabla = document.getElementById("tabla");
+
+    let filtrados = datos;
+
+    if (categoriaActual !== "Todas") {
+
+      filtrados = datos.filter(item => {
+
+        return (
+          item.category === categoriaActual ||
+          item.categoria === categoriaActual
+        );
+
+      });
+
+    }
+
+
+    if (!filtrados.length) {
+
+      tabla.innerHTML = `
+        <tr>
+          <td colspan="8">
+            No hay equipos registrados todavía.
+          </td>
+        </tr>
+      `;
+
+      return;
+    }
+
+
+    tabla.innerHTML = filtrados
+      .map((equipo, index) => {
+
+        return `
+          <tr>
+
+            <td>${index + 1}</td>
+
+            <td>
+              <strong>
+                ${equipo.team_name || equipo.equipo || "-"}
+              </strong>
+            </td>
+
+            <td>
+              ${equipo.played || equipo.pj || 0}
+            </td>
+
+            <td>
+              ${equipo.wins || equipo.pg || 0}
+            </td>
+
+            <td>
+              ${equipo.losses || equipo.pp || 0}
+            </td>
+
+            <td>
+              ${equipo.points_for || equipo.pf || 0}
+            </td>
+
+            <td>
+              ${equipo.points_against || equipo.pc || 0}
+            </td>
+
+            <td>
+              <strong>
+                ${equipo.points || equipo.pts || 0}
+              </strong>
+            </td>
+
+          </tr>
+        `;
+
+      })
+      .join("");
+  }
+
+
+  cargarDatos();
+
+</script>
+
+</body>
+</html>      <div class="hero-overlay"></div>
       <div class="container hero-content">
         <div class="eyebrow">PRIMER TORNEO • CIENEGUILLA</div>
         <h1>LIGA CIENEGUILLA<br><span>BASKETBALL</span></h1>
