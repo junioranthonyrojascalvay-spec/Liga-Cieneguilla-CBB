@@ -104,7 +104,8 @@ $("#teamForm").addEventListener("submit", async (e) => {
 
   const category = $("#teamCategory").value;
   const name = $("#teamName").value.trim();
-  const logo_url = $("#teamLogoUrl").value.trim();
+  const logoFile = $("#teamLogoFile").files[0];
+let logo_url = "";
 
   if (!name) {
     $("#teamMsg").textContent =
@@ -116,29 +117,52 @@ $("#teamForm").addEventListener("submit", async (e) => {
 
   let result;
 
-  if (editingId) {
+if (logoFile) {
+  const fileExt = logoFile.name.split(".").pop().toLowerCase();
+  const fileName = `${Date.now()}-${Math.random().toString(36).slice(2)}.${fileExt}`;
 
-    result = await db
-      .from("teams")
-      .update({
-        category,
-        name,
-        logo_url: logo_url || null
-      })
-      .eq("id", editingId);
+  const uploadResult = await db.storage
+    .from("team-logos")
+    .upload(fileName, logoFile, {
+      upsert: false,
+      contentType: logoFile.type
+    });
 
-  } else {
-
-    result = await db
-      .from("teams")
-      .insert({
-        category,
-        name,
-        logo_url: logo_url || null
-      });
-
+  if (uploadResult.error) {
+    $("#teamMsg").textContent = "Error al subir el logo: " + uploadResult.error.message;
+    return;
   }
 
+  const { data: publicUrlData } = db.storage
+    .from("team-logos")
+    .getPublicUrl(fileName);
+
+  logo_url = publicUrlData.publicUrl;
+}
+
+if (editingId) {
+  const updateData = {
+    category,
+    name
+  };
+
+  if (logoFile) {
+    updateData.logo_url = logo_url;
+  }
+
+  result = await db
+    .from("teams")
+    .update(updateData)
+    .eq("id", editingId);
+} else {
+  result = await db
+    .from("teams")
+    .insert({
+      category,
+      name,
+      logo_url: logo_url || null
+    });
+}
   if (result.error) {
     $("#teamMsg").textContent =
       result.error.message;
