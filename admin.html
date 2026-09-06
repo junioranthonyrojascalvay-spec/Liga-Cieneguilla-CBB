@@ -1,47 +1,265 @@
 <!doctype html>
 <html lang="es">
 <head>
-  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Administrador — Liga Cieneguilla</title><link rel="stylesheet" href="styles.css">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Administrador — Liga Cieneguilla</title>
+<link rel="stylesheet" href="styles.css">
 </head>
+
 <body>
+
 <header class="site-header">
-  <a class="brand" href="index.html"><img src="assets/logo.jpg" alt=""><span><b>CIENEGUILLA</b><small>ADMIN</small></span></a>
+  <a class="brand" href="index.html">
+    <img src="assets/logo.jpg" alt="">
+    <span>
+      <b>CIENEGUILLA</b>
+      <small>ADMIN</small>
+    </span>
+  </a>
+
   <a class="back-link" href="index.html">← Página pública</a>
 </header>
+
 <main class="admin-main">
+
+  <!-- LOGIN -->
   <section class="admin-login panel" id="loginPanel">
-    <p class="eyebrow">ACCESO PRIVADO</p><h1>Panel de administración</h1>
-    <p>Desde aquí podrás cargar partidos, resultados y estadísticas.</p>
+    <p class="eyebrow">ACCESO PRIVADO</p>
+    <h1>Panel de administración</h1>
+    <p>Gestiona equipos, partidos, resultados y estadísticas del torneo.</p>
+
     <form id="loginForm">
-      <label>Correo<input id="email" type="email" required placeholder="Tu correo"></label>
-      <label>Contraseña<input id="password" type="password" required placeholder="••••••••"></label>
-      <button class="primary-btn" type="submit">Iniciar sesión</button>
+
+      <label>
+        Correo
+        <input
+          id="email"
+          type="email"
+          required
+          placeholder="Tu correo">
+      </label>
+
+      <label>
+        Contraseña
+        <input
+          id="password"
+          type="password"
+          required
+          placeholder="••••••••">
+      </label>
+
+      <button class="primary-btn" type="submit">
+        Iniciar sesión
+      </button>
+
       <p class="form-msg" id="loginMsg"></p>
+
     </form>
   </section>
 
+
+  <!-- DASHBOARD -->
   <section class="admin-dashboard hidden" id="dashboard">
-    <div class="admin-top"><div><p class="eyebrow">PANEL PRIVADO</p><h1>Control del torneo</h1></div><button class="ghost-btn" id="logoutBtn">Cerrar sesión</button></div>
-    <div class="admin-grid">
-      <section class="panel"><div class="panel-title"><span>REGISTRAR PARTIDO</span></div>
-        <form id="gameForm" class="form-grid">
-          <label>Categoría<select id="gameCategory"><option>Sub-13</option><option>Sub-16</option><option>Sub-18</option><option>Libre</option></select></label>
-          <label>Fecha<input id="gameDate" type="datetime-local" required></label>
-          <label>Local<input id="homeTeam" required placeholder="Equipo local"></label>
-          <label>Visitante<input id="awayTeam" required placeholder="Equipo visitante"></label>
-          <label>Cancha<input id="venue" placeholder="Cancha Cieneguilla"></label>
-          <label>Estado<select id="gameStatus"><option value="scheduled">Programado</option><option value="live">En vivo</option><option value="finished">Finalizado</option></select></label>
-          <button class="primary-btn" type="submit">Guardar partido</button>
-          <p class="form-msg" id="gameMsg"></p>
-        </form>
-      </section>
-      <section class="panel"><div class="panel-title"><span>PARTIDOS REGISTRADOS</span></div><div id="adminGames" class="game-list"><div class="empty">Cargando…</div></div></section>
+
+    <div class="admin-top">
+      <div>
+        <p class="eyebrow">PANEL PRIVADO</p>
+        <h1>Control del torneo</h1>
+      </div>
+
+      <button class="ghost-btn" id="logoutBtn">
+        Cerrar sesión
+      </button>
     </div>
+
+
+    <!-- GESTIÓN DE EQUIPOS -->
+    <div class="admin-grid">
+
+      <section class="panel">
+
+        <div class="panel-title">
+          <span>GESTIÓN DE EQUIPOS</span>
+        </div>
+
+        <form id="teamForm" class="form-grid">
+
+          <label>
+            Categoría
+
+            <select id="teamCategory">
+              <option>Sub-13</option>
+              <option>Sub-16</option>
+              <option>Sub-18</option>
+              <option>Libre</option>
+            </select>
+          </label>
+
+
+          <label>
+            Nombre del equipo
+
+            <input
+              id="teamName"
+              type="text"
+              required
+              placeholder="Ej. Nova Hoops">
+          </label>
+
+
+          <label>
+            Logo del equipo
+
+            <input
+              id="teamLogoUrl"
+              type="url"
+              placeholder="URL del logo (opcional)">
+          </label>
+
+
+          <button class="primary-btn" type="submit">
+            Guardar equipo
+          </button>
+
+          <p class="form-msg" id="teamMsg"></p>
+
+        </form>
+
+      </section>
+
+
+      <!-- LISTA DE EQUIPOS -->
+      <section class="panel">
+
+        <div class="panel-title">
+          <span>EQUIPOS REGISTRADOS</span>
+        </div>
+
+        <div id="adminTeams" class="game-list">
+
+          <div class="empty">
+            Cargando equipos…
+          </div>
+
+        </div>
+
+      </section>
+
+    </div>
+
+
+    <!-- REGISTRAR PARTIDOS -->
+    <div class="admin-grid">
+
+      <section class="panel">
+
+        <div class="panel-title">
+          <span>REGISTRAR PARTIDO</span>
+        </div>
+
+        <form id="gameForm" class="form-grid">
+
+          <label>
+            Categoría
+
+            <select id="gameCategory">
+              <option>Sub-13</option>
+              <option>Sub-16</option>
+              <option>Sub-18</option>
+              <option>Libre</option>
+            </select>
+          </label>
+
+
+          <label>
+            Fecha
+
+            <input
+              id="gameDate"
+              type="datetime-local"
+              required>
+          </label>
+
+
+          <label>
+            Local
+
+            <input
+              id="homeTeam"
+              required
+              placeholder="Equipo local">
+          </label>
+
+
+          <label>
+            Visitante
+
+            <input
+              id="awayTeam"
+              required
+              placeholder="Equipo visitante">
+          </label>
+
+
+          <label>
+            Cancha
+
+            <input
+              id="venue"
+              placeholder="Cancha Cieneguilla">
+          </label>
+
+
+          <label>
+            Estado
+
+            <select id="gameStatus">
+              <option value="scheduled">Programado</option>
+              <option value="live">En vivo</option>
+              <option value="finished">Finalizado</option>
+            </select>
+          </label>
+
+
+          <button class="primary-btn" type="submit">
+            Guardar partido
+          </button>
+
+          <p class="form-msg" id="gameMsg"></p>
+
+        </form>
+
+      </section>
+
+
+      <!-- PARTIDOS REGISTRADOS -->
+      <section class="panel">
+
+        <div class="panel-title">
+          <span>PARTIDOS REGISTRADOS</span>
+        </div>
+
+        <div id="adminGames" class="game-list">
+
+          <div class="empty">
+            Cargando…
+          </div>
+
+        </div>
+
+      </section>
+
+    </div>
+
   </section>
+
 </main>
+
+
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="config.js"></script>
 <script src="admin.js"></script>
+
 </body>
 </html>
