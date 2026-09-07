@@ -43,10 +43,27 @@
 
 <section class="section" id="partidos">
   <div class="section-head"><div><p class="eyebrow">CATEGORÍA SELECCIONADA</p><h2 id="selectedCategory">Sub-13</h2></div><button class="ghost-btn" id="refreshBtn">Actualizar ↻</button></div>
-  <div class="panel">
-    <div class="panel-title"><span>PRÓXIMOS PARTIDOS</span><span id="nextStatus">Conectando…</span></div>
-    <div id="upcoming" class="game-list"><div class="empty">Cargando partidos…</div></div>
+<div class="panel">
+  <div class="panel-title">
+    <span>PARTIDOS</span>
+    <span id="nextStatus">Conectando...</span>
   </div>
+
+  <h3>🔴 EN VIVO</h3>
+  <div id="liveGames" class="game-list">
+    <div class="empty">No hay partidos en vivo.</div>
+  </div>
+
+  <h3>📅 PRÓXIMOS PARTIDOS</h3>
+  <div id="upcoming" class="game-list">
+    <div class="empty">Cargando partidos...</div>
+  </div>
+
+  <h3>🏁 PARTIDOS FINALIZADOS</h3>
+  <div id="finishedGames" class="game-list">
+    <div class="empty">No hay partidos finalizados.</div>
+  </div>
+</div>
 </section>
 
 <section class="section two-col" id="tabla">
