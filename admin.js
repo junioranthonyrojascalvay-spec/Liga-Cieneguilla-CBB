@@ -384,15 +384,12 @@ $("#gameForm").addEventListener("submit", async (e) => {
 ========================= */
 
 async function loadAdminGames() {
-
   if (!db) return;
 
   const { data, error } = await db
     .from("games")
     .select("*")
-    .order("game_date", {
-      ascending: false
-    })
+    .order("game_date", { ascending: false })
     .limit(30);
 
   const el = $("#adminGames");
@@ -400,77 +397,164 @@ async function loadAdminGames() {
   if (error) {
     el.innerHTML =
       '<div class="empty">Error cargando partidos.</div>';
+    console.error(error);
     return;
   }
 
+  // Cargar equipos para obtener sus logos
+  const { data: teams } = await db
+    .from("teams")
+    .select("name, logo_url");
+
+  const teamMap = {};
+
+  (teams || []).forEach((team) => {
+    teamMap[team.name] = team.logo_url || "";
+  });
+
   el.innerHTML =
-    (data || []).map((g) => `
+    (data || []).map((g) => {
 
-      <div class="admin-game">
+      const homeLogo = teamMap[g.home_team] || "";
+      const awayLogo = teamMap[g.away_team] || "";
 
-        <div>
+      let statusText = "PROGRAMADO";
+      let statusClass = "scheduled";
 
-          <span class="tag">
-            ${esc(g.category)}
-          </span>
+      if (g.status === "live") {
+        statusText = "EN VIVO";
+        statusClass = "live";
+      }
 
-          <b>
-            ${esc(g.home_team)}
-            vs
-            ${esc(g.away_team)}
-          </b>
+      if (g.status === "finished") {
+        statusText = "FINALIZADO";
+        statusClass = "finished";
+      }
 
-          <small>
-            ${new Date(g.game_date).toLocaleString("es-PE")}
-          </small>
+      return `
+        <div class="admin-game">
+
+          <div>
+
+            <span class="tag">
+              ${esc(g.category)}
+            </span>
+
+            <div style="
+              display:flex;
+              align-items:center;
+              justify-content:center;
+              gap:18px;
+              margin:15px 0;
+              text-align:center;
+            ">
+
+              <div>
+                ${
+                  homeLogo
+                    ? `<img src="${esc(homeLogo)}"
+                        alt=""
+                        style="width:55px;height:55px;object-fit:contain;display:block;margin:auto;">`
+                    : ""
+                }
+
+                <b>${esc(g.home_team)}</b>
+
+                <div style="
+                  font-size:28px;
+                  font-weight:800;
+                  margin-top:5px;
+                ">
+                  ${g.home_score ?? 0}
+                </div>
+              </div>
+
+              <strong style="font-size:18px;">
+                VS
+              </strong>
+
+              <div>
+                ${
+                  awayLogo
+                    ? `<img src="${esc(awayLogo)}"
+                        alt=""
+                        style="width:55px;height:55px;object-fit:contain;display:block;margin:auto;">`
+                    : ""
+                }
+
+                <b>${esc(g.away_team)}</b>
+
+                <div style="
+                  font-size:28px;
+                  font-weight:800;
+                  margin-top:5px;
+                ">
+                  ${g.away_score ?? 0}
+                </div>
+              </div>
+
+            </div>
+
+            <div style="
+              text-align:center;
+              margin:8px 0;
+              font-weight:800;
+            ">
+              ${statusText}
+            </div>
+
+            <small>
+              ${new Date(g.game_date).toLocaleString("es-PE")}
+            </small>
+
+            <br>
+
+            <small>
+              📍 ${esc(g.venue || "Cancha Cieneguilla")}
+            </small>
+
+          </div>
+
+          <div class="admin-actions">
+
+            <button
+              class="small-btn"
+              data-live="${esc(g.id)}">
+              En vivo
+            </button>
+
+            <button
+              class="small-btn"
+              data-finish="${esc(g.id)}">
+              Finalizar
+            </button>
+
+          </div>
 
         </div>
-
-        <div class="admin-actions">
-
-          <button
-            class="small-btn"
-            data-live="${esc(g.id)}">
-            En vivo
-          </button>
-
-          <button
-            class="small-btn"
-            data-finish="${esc(g.id)}">
-            Finalizar
-          </button>
-
-        </div>
-
-      </div>
-
-    `).join("") ||
+      `;
+    }).join("") ||
     '<div class="empty">No hay partidos.</div>';
 
-
+  // BOTÓN EN VIVO
   el.querySelectorAll("[data-live]").forEach((b) => {
-
     b.addEventListener("click", () =>
       setStatus(
         b.dataset.live,
         "live"
       )
     );
-
   });
 
-
+  // BOTÓN FINALIZAR
   el.querySelectorAll("[data-finish]").forEach((b) => {
-
     b.addEventListener("click", () =>
       setStatus(
         b.dataset.finish,
         "finished"
       )
     );
-
   });
-
 }
 
 
