@@ -20,20 +20,59 @@ async function loadGames() {
   if(error){ console.error(error); return []; }
   return data || [];
 }
-function renderGames(games){
-  const el=$("#upcoming");
-  if(!games.length){el.innerHTML='<div class="empty">Aún no hay partidos registrados para esta categoría.</div>';return;}
-  el.innerHTML=games.map(g=>{
-    const d=new Date(g.game_date);
-    const date=d.toLocaleDateString("es-PE",{day:"2-digit",month:"short"});
-    const time=d.toLocaleTimeString("es-PE",{hour:"2-digit",minute:"2-digit"});
-    const live=g.status==="live";
-    return `<article class="game-row ${live?'is-live':''}">
-      <div class="game-date"><b>${esc(date)}</b><small>${esc(time)}</small></div>
-      <div class="teams"><b>${esc(g.home_team)}</b><span>VS</span><b>${esc(g.away_team)}</b><small>${esc(g.venue||"Cancha por confirmar")}</small></div>
-      <div class="game-score">${live?`<span class="live-pill">EN VIVO</span>`:(g.status==="finished"?`${g.home_score} - ${g.away_score}`:"PRÓXIMO")}</div>
-    </article>`;
-  }).join("");
+function renderGames(games) {
+  const upcoming = $("#upcoming");
+  const liveGames = $("#liveGames");
+  const finishedGames = $("#finishedGames");
+
+  const live = games.filter(g => g.status === "live");
+  const finished = games.filter(g => g.status === "finished");
+  const next = games.filter(g => g.status !== "live" && g.status !== "finished");
+
+  function card(g) {
+    const d = new Date(g.game_date);
+
+    const date = d.toLocaleDateString("es-PE", {
+      day: "2-digit",
+      month: "short"
+    });
+
+    const time = d.toLocaleTimeString("es-PE", {
+      hour: "2-digit",
+      minute: "2-digit"
+    });
+
+    return `
+      <article class="game-row">
+        <div class="game-date">
+          <b>${esc(date)}</b>
+          <small>${esc(time)}</small>
+        </div>
+
+        <div class="teams">
+          <b>${esc(g.home_team)}</b>
+          <span>VS</span>
+          <b>${esc(g.away_team)}</b>
+        </div>
+
+        <div class="game-score">
+          ${g.home_score ?? 0} - ${g.away_score ?? 0}
+        </div>
+      </article>
+    `;
+  }
+
+  liveGames.innerHTML = live.length
+    ? live.map(card).join("")
+    : '<div class="empty">No hay partidos en vivo.</div>';
+
+  upcoming.innerHTML = next.length
+    ? next.map(card).join("")
+    : '<div class="empty">No hay próximos partidos.</div>';
+
+  finishedGames.innerHTML = finished.length
+    ? finished.map(card).join("")
+    : '<div class="empty">No hay partidos finalizados.</div>';
 }
 async function loadStandings(){
   const body=$("#standings");
