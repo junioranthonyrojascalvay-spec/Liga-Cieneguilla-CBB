@@ -434,16 +434,13 @@ async function loadAdminGames() {
       const awayLogo = teamMap[g.away_team] || "";
 
       let statusText = "PROGRAMADO";
-      let statusClass = "scheduled";
 
       if (g.status === "live") {
         statusText = "EN VIVO";
-        statusClass = "live";
       }
 
       if (g.status === "finished") {
         statusText = "FINALIZADO";
-        statusClass = "finished";
       }
 
       return `
@@ -531,11 +528,13 @@ async function loadAdminGames() {
           </div>
 
           <div class="admin-actions">
-<button
-  class="small-btn"
-  data-edit-game="${esc(g.id)}">
-   Editar
-</button>
+
+            <button
+              class="small-btn"
+              data-edit-game="${esc(g.id)}">
+              ✏️ Editar
+            </button>
+
             <button
               class="small-btn"
               data-live="${esc(g.id)}">
@@ -547,132 +546,125 @@ async function loadAdminGames() {
               data-finish="${esc(g.id)}">
               Finalizar
             </button>
-<button
-  class="small-btn"
-  data-delete-game="${esc(g.id)}">
-   Eliminar
-</button>
+
+            <button
+              class="small-btn"
+              data-delete-game="${esc(g.id)}">
+              🗑️ Eliminar
+            </button>
+
           </div>
 
         </div>
       `;
     }).join("") ||
     '<div class="empty">No hay partidos.</div>';
-// BOTÓN ELIMINAR
-el.querySelectorAll("[data-delete-game]").forEach((b) => {
-  b.addEventListener("click", async () => {
 
-    const game = (data || []).find(
-      (item) => item.id === b.dataset.deleteGame
-    );
 
-    if (!game) return;
+  // BOTÓN EDITAR
+  el.querySelectorAll("[data-edit-game]").forEach((b) => {
 
-    const confirmar = confirm(
-      `¿Eliminar el partido ${game.home_team} vs ${game.away_team}?`
-    );
+    b.addEventListener("click", () => {
 
-    if (!confirmar) return;
+      const game = (data || []).find(
+        (item) => item.id === b.dataset.editGame
+      );
 
-    const { error } = await db
-      .from("games")
-      .delete()
-      .eq("id", game.id);
+      if (!game) return;
 
-    if (error) {
-      alert("Error al eliminar: " + error.message);
-      return;
-    }
-// BOTÓN EDITAR
-el.querySelectorAll("[data-edit-game]").forEach((b) => {
-  b.addEventListener("click", () => {
+      $("#gameCategory").value = game.category;
 
-    const game = (data || []).find(
-      (item) => item.id === b.dataset.editGame
-    );
+      $("#gameDate").value = new Date(game.game_date)
+        .toISOString()
+        .slice(0, 16);
 
-    if (!game) return;
+      $("#venue").value = game.venue || "";
 
-    $("#gameCategory").value = game.category;
-    $("#gameDate").value = new Date(game.game_date)
-      .toISOString()
-      .slice(0, 16);
+      $("#gameStatus").value = game.status;
 
-    $("#venue").value = game.venue || "";
-    $("#gameStatus").value = game.status;
+      $("#gameForm").dataset.editingId = game.id;
 
-    $("#gameForm").dataset.editingId = game.id;
+      $("#gameMsg").textContent =
+        "Editando partido: " +
+        game.home_team +
+        " vs " +
+        game.away_team;
 
-    $("#gameMsg").textContent =
-      "Editando partido: " +
-      game.home_team +
-      " vs " +
-      game.away_team;
+      loadGameTeamOptions().then(() => {
+        $("#homeTeam").value = game.home_team;
+        $("#awayTeam").value = game.away_team;
+      });
 
-    loadGameTeamOptions().then(() => {
-      $("#homeTeam").value = game.home_team;
-      $("#awayTeam").value = game.away_team;
-    });
+      window.scrollTo({
+        top: 0,
+        behavior: "smooth"
+      });
 
-    window.scrollTo({
-      top: 0,
-      behavior: "smooth"
     });
 
   });
-});
-    loadAdminGames();
-  });
-});
+
+
   // BOTÓN EN VIVO
   el.querySelectorAll("[data-live]").forEach((b) => {
+
     b.addEventListener("click", () =>
       setStatus(
         b.dataset.live,
         "live"
       )
     );
+
   });
+
 
   // BOTÓN FINALIZAR
   el.querySelectorAll("[data-finish]").forEach((b) => {
+
     b.addEventListener("click", () =>
       setStatus(
         b.dataset.finish,
         "finished"
       )
     );
+
   });
+
+
+  // BOTÓN ELIMINAR
+  el.querySelectorAll("[data-delete-game]").forEach((b) => {
+
+    b.addEventListener("click", async () => {
+
+      const game = (data || []).find(
+        (item) => item.id === b.dataset.deleteGame
+      );
+
+      if (!game) return;
+
+      const confirmar = confirm(
+        `¿Eliminar el partido ${game.home_team} vs ${game.away_team}?`
+      );
+
+      if (!confirmar) return;
+
+      const { error } = await db
+        .from("games")
+        .delete()
+        .eq("id", game.id);
+
+      if (error) {
+        alert("Error al eliminar: " + error.message);
+        return;
+      }
+
+      loadAdminGames();
+
+    });
+
+  });
+
 }
-// BOTÓN ELIMINAR
-el.querySelectorAll("[data-delete-game]").forEach((b) => {
-  b.addEventListener("click", async () => {
-
-    const game = (data || []).find(
-      (item) => item.id === b.dataset.deleteGame
-    );
-
-    if (!game) return;
-
-    const confirmar = confirm(
-      `¿Eliminar el partido ${game.home_team} vs ${game.away_team}?`
-    );
-
-    if (!confirmar) return;
-
-    const { error } = await db
-      .from("games")
-      .delete()
-      .eq("id", game.id);
-
-    if (error) {
-      alert("Error al eliminar: " + error.message);
-      return;
-    }
-
-    loadAdminGames();
-  });
-});
 
 /* =========================
    CAMBIAR ESTADO
