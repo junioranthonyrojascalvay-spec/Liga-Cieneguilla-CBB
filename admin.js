@@ -755,29 +755,45 @@ async function loadGameTeamOptions() {
 
   if (!category) return;
 
-  const { data, error } = await db
-    .from("teams")
-    .select("name")
-    .eq("category", category)
-    .order("name");
+  try {
+    const { data, error } = await db
+      .from("teams")
+      .select("name")
+      .eq("category", category)
+      .order("name");
 
-  if (error) {
-    console.error("Error cargando equipos:", error);
-    return;
+    if (error) {
+      $("#gameMsg").textContent =
+        "ERROR SUPABASE: " + error.message;
+      return;
+    }
+
+    if (!data || data.length === 0) {
+      $("#gameMsg").textContent =
+        "No se encontraron equipos para " + category;
+      return;
+    }
+
+    data.forEach((team) => {
+      const homeOption = document.createElement("option");
+      homeOption.value = team.name;
+      homeOption.textContent = team.name;
+
+      const awayOption = document.createElement("option");
+      awayOption.value = team.name;
+      awayOption.textContent = team.name;
+
+      home.appendChild(homeOption);
+      away.appendChild(awayOption);
+    });
+
+    $("#gameMsg").textContent =
+      "Equipos cargados correctamente: " + data.length;
+
+  } catch (error) {
+    $("#gameMsg").textContent =
+      "ERROR JAVASCRIPT: " + error.message;
   }
-
-  (data || []).forEach((team) => {
-    const homeOption = document.createElement("option");
-    homeOption.value = team.name;
-    homeOption.textContent = team.name;
-
-    const awayOption = document.createElement("option");
-    awayOption.value = team.name;
-    awayOption.textContent = team.name;
-
-    home.appendChild(homeOption);
-    away.appendChild(awayOption);
-  });
 }
 $("#gameCategory").addEventListener("change", loadGameTeamOptions);
 loadGameTeamOptions();
