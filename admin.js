@@ -528,7 +528,11 @@ async function loadAdminGames() {
               data-finish="${esc(g.id)}">
               Finalizar
             </button>
-
+<button
+  class="small-btn"
+  data-delete-game="${esc(g.id)}">
+  🗑️ Eliminar
+</button>
           </div>
 
         </div>
@@ -556,7 +560,35 @@ async function loadAdminGames() {
     );
   });
 }
+// BOTÓN ELIMINAR
+el.querySelectorAll("[data-delete-game]").forEach((b) => {
+  b.addEventListener("click", async () => {
 
+    const game = (data || []).find(
+      (item) => item.id === b.dataset.deleteGame
+    );
+
+    if (!game) return;
+
+    const confirmar = confirm(
+      `¿Eliminar el partido ${game.home_team} vs ${game.away_team}?`
+    );
+
+    if (!confirmar) return;
+
+    const { error } = await db
+      .from("games")
+      .delete()
+      .eq("id", game.id);
+
+    if (error) {
+      alert("Error al eliminar: " + error.message);
+      return;
+    }
+
+    loadAdminGames();
+  });
+});
 
 /* =========================
    CAMBIAR ESTADO
