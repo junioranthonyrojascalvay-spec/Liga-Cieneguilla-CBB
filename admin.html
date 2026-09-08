@@ -278,7 +278,95 @@
       </section>
 
     </div>
+<!-- GESTIÓN DE JUGADORES -->
+<div class="admin-grid">
 
+  <section class="panel">
+
+    <div class="panel-title">
+      <span>REGISTRAR JUGADOR</span>
+    </div>
+
+    <form id="playerForm" class="form-grid">
+
+      <label>
+        Categoría
+
+        <select id="playerCategory">
+          <option>Sub-13</option>
+          <option>Sub-16</option>
+          <option>Sub-18</option>
+          <option>Libre</option>
+        </select>
+      </label>
+
+      <label>
+        Equipo
+
+        <select id="playerTeam" required>
+          <option value="">Selecciona equipo</option>
+        </select>
+      </label>
+
+      <label>
+        Nombre del jugador
+
+        <input
+          id="playerName"
+          type="text"
+          required
+          placeholder="Ej. Juan Pérez">
+      </label>
+
+      <label>
+        Número
+
+        <input
+          id="playerNumber"
+          type="number"
+          min="0"
+          max="99"
+          placeholder="Ej. 7">
+      </label>
+
+      <label>
+        Foto del jugador
+
+        <input
+          id="playerPhotoFile"
+          type="file"
+          accept="image/png,image/jpeg,image/webp">
+      </label>
+
+      <button class="primary-btn" type="submit">
+        Guardar jugador
+      </button>
+
+      <p class="form-msg" id="playerMsg"></p>
+
+    </form>
+
+  </section>
+
+
+  <!-- JUGADORES REGISTRADOS -->
+  <section class="panel">
+
+    <div class="panel-title">
+      <span>JUGADORES REGISTRADOS</span>
+    </div>
+
+    <div id="adminPlayers" class="game-list">
+
+      <div class="empty">
+        Cargando jugadores…
+      </div>
+
+    </div>
+
+  </section>
+
+</div>
   </section>
 
 </main>
