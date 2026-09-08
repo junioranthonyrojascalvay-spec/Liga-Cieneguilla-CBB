@@ -369,7 +369,7 @@ $("#playerCategory").addEventListener(
   "change",
   loadPlayerTeamOptions
 );
-
+loadPlayerTeamOptions();
 
 $("#playerForm").addEventListener(
   "submit",
