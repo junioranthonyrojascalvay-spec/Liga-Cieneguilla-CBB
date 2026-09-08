@@ -358,8 +358,8 @@ $("#gameForm").addEventListener("submit", async (e) => {
 
     status: $("#gameStatus").value,
 
-    home_score: 0,
-    away_score: 0
+   home_score: Number($("#homeScore").value) || 0,
+away_score: Number($("#awayScore").value) || 0
   };
 
   let error;
