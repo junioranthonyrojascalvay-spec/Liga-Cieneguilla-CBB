@@ -217,7 +217,37 @@
               <option value="finished">Finalizado</option>
             </select>
           </label>
+<div id="scoreBox" class="score-box hidden">
 
+  <h3>🏁 Resultado final</h3>
+
+  <div class="score-inputs">
+
+    <label>
+      Local
+      <input
+        id="homeScore"
+        type="number"
+        min="0"
+        value="0"
+        placeholder="0">
+    </label>
+
+    <span>—</span>
+
+    <label>
+      Visitante
+      <input
+        id="awayScore"
+        type="number"
+        min="0"
+        value="0"
+        placeholder="0">
+    </label>
+
+  </div>
+
+</div>
 
           <button class="primary-btn" type="submit">
             Guardar partido
