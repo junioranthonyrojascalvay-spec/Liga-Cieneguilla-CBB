@@ -581,7 +581,9 @@ async function loadAdminGames() {
       $("#venue").value = game.venue || "";
 
       $("#gameStatus").value = game.status;
-
+$("#homeScore").value = game.home_score ?? 0;
+$("#awayScore").value = game.away_score ?? 0;
+updateScoreBox();
       $("#gameForm").dataset.editingId = game.id;
 
       $("#gameMsg").textContent =
