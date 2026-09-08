@@ -797,3 +797,12 @@ async function loadGameTeamOptions() {
 }
 $("#gameCategory").addEventListener("change", loadGameTeamOptions);
 loadGameTeamOptions();
+$("#gameStatus").addEventListener("change", () => {
+  const scoreBox = $("#scoreBox");
+
+  if ($("#gameStatus").value === "finished") {
+    scoreBox.classList.remove("hidden");
+  } else {
+    scoreBox.classList.add("hidden");
+  }
+});
