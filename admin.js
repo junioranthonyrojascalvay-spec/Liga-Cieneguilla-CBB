@@ -362,10 +362,24 @@ $("#gameForm").addEventListener("submit", async (e) => {
     away_score: 0
   };
 
-  const { error } = await db
+  let error;
+
+const editingId = e.target.dataset.editingId;
+
+if (editingId) {
+  const result = await db
+    .from("games")
+    .update(payload)
+    .eq("id", editingId);
+
+  error = result.error;
+} else {
+  const result = await db
     .from("games")
     .insert(payload);
 
+  error = result.error;
+}
   $("#gameMsg").textContent =
     error
       ? error.message
@@ -373,6 +387,7 @@ $("#gameForm").addEventListener("submit", async (e) => {
 
   if (!error) {
     e.target.reset();
+    delete e.target.dataset.editingId;
     loadAdminGames();
   }
 
@@ -516,7 +531,11 @@ async function loadAdminGames() {
           </div>
 
           <div class="admin-actions">
-
+<button
+  class="small-btn"
+  data-edit-game="${esc(g.id)}">
+   Editar
+</button>
             <button
               class="small-btn"
               data-live="${esc(g.id)}">
@@ -564,7 +583,44 @@ el.querySelectorAll("[data-delete-game]").forEach((b) => {
       alert("Error al eliminar: " + error.message);
       return;
     }
+// BOTÓN EDITAR
+el.querySelectorAll("[data-edit-game]").forEach((b) => {
+  b.addEventListener("click", () => {
 
+    const game = (data || []).find(
+      (item) => item.id === b.dataset.editGame
+    );
+
+    if (!game) return;
+
+    $("#gameCategory").value = game.category;
+    $("#gameDate").value = new Date(game.game_date)
+      .toISOString()
+      .slice(0, 16);
+
+    $("#venue").value = game.venue || "";
+    $("#gameStatus").value = game.status;
+
+    $("#gameForm").dataset.editingId = game.id;
+
+    $("#gameMsg").textContent =
+      "Editando partido: " +
+      game.home_team +
+      " vs " +
+      game.away_team;
+
+    loadGameTeamOptions().then(() => {
+      $("#homeTeam").value = game.home_team;
+      $("#awayTeam").value = game.away_team;
+    });
+
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth"
+    });
+
+  });
+});
     loadAdminGames();
   });
 });
