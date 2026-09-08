@@ -330,7 +330,202 @@ async function loadAdminTeams() {
 
 }
 
+/* =========================
+   JUGADORES
+========================= */
 
+async function loadPlayerTeamOptions() {
+  const category = $("#playerCategory").value;
+  const team = $("#playerTeam");
+
+  team.innerHTML =
+    '<option value="">Selecciona equipo</option>';
+
+  if (!category || !db) return;
+
+  const { data, error } = await db
+    .from("teams")
+    .select("name")
+    .eq("category", category)
+    .order("name");
+
+  if (error) {
+    console.error("Error cargando equipos para jugadores:", error);
+    $("#playerMsg").textContent =
+      "Error cargando equipos.";
+    return;
+  }
+
+  (data || []).forEach((item) => {
+    const option = document.createElement("option");
+    option.value = item.name;
+    option.textContent = item.name;
+    team.appendChild(option);
+  });
+}
+
+
+$("#playerCategory").addEventListener(
+  "change",
+  loadPlayerTeamOptions
+);
+
+
+$("#playerForm").addEventListener(
+  "submit",
+  async (e) => {
+
+    e.preventDefault();
+
+    if (!db) {
+      $("#playerMsg").textContent =
+        "Conecta Supabase primero.";
+      return;
+    }
+
+    const category =
+      $("#playerCategory").value;
+
+    const team_name =
+      $("#playerTeam").value;
+
+    const name =
+      $("#playerName").value.trim();
+
+    const number =
+      $("#playerNumber").value
+        ? Number($("#playerNumber").value)
+        : null;
+
+    if (!category || !team_name || !name) {
+      $("#playerMsg").textContent =
+        "Completa categoría, equipo y nombre.";
+      return;
+    }
+
+    const { error } = await db
+      .from("players")
+      .insert({
+        category,
+        team_name,
+        name,
+        number,
+        photo_url: null
+      });
+
+    if (error) {
+      $("#playerMsg").textContent =
+        "Error: " + error.message;
+      return;
+    }
+
+    $("#playerMsg").textContent =
+      "Jugador guardado correctamente.";
+
+    e.target.reset();
+
+    loadPlayerTeamOptions();
+    loadAdminPlayers();
+  }
+);
+
+
+/* CARGAR JUGADORES */
+
+async function loadAdminPlayers() {
+
+  if (!db) return;
+
+  const el = $("#adminPlayers");
+
+  const { data, error } = await db
+    .from("players")
+    .select("*")
+    .order("category")
+    .order("team_name")
+    .order("name");
+
+  if (error) {
+    el.innerHTML =
+      '<div class="empty">Error cargando jugadores.</div>';
+    console.error(error);
+    return;
+  }
+
+  if (!data || !data.length) {
+    el.innerHTML =
+      '<div class="empty">Aún no hay jugadores registrados.</div>';
+    return;
+  }
+
+  el.innerHTML = data.map((player) => `
+    <div class="admin-game">
+
+      <div>
+        <span class="tag">
+          ${esc(player.category)}
+        </span>
+
+        <b>${esc(player.name)}</b>
+
+        <small>
+          ${esc(player.team_name)}
+          ${player.number !== null
+            ? " · Nº " + esc(player.number)
+            : ""}
+        </small>
+      </div>
+
+      <div class="admin-actions">
+        <button
+          class="small-btn"
+          data-delete-player="${esc(player.id)}">
+          🗑️ Eliminar
+        </button>
+      </div>
+
+    </div>
+  `).join("");
+
+
+  el.querySelectorAll(
+    "[data-delete-player]"
+  ).forEach((button) => {
+
+    button.addEventListener(
+      "click",
+      async () => {
+
+        const player = data.find(
+          (item) =>
+            item.id ===
+            button.dataset.deletePlayer
+        );
+
+        if (!player) return;
+
+        const confirmar = confirm(
+          `¿Eliminar al jugador "${player.name}"?`
+        );
+
+        if (!confirmar) return;
+
+        const { error } = await db
+          .from("players")
+          .delete()
+          .eq("id", player.id);
+
+        if (error) {
+          alert(error.message);
+          return;
+        }
+
+        loadAdminPlayers()
+loadPlayerTeamOptions();
+      }
+    );
+  });
+}
 /* =========================
    PARTIDOS
 ========================= */
