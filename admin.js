@@ -478,6 +478,12 @@ async function loadAdminPlayers() {
 
       <div class="admin-actions">
         <button
+  class="small-btn"
+  data-edit-player="${esc(player.id)}">
+  ✏️ Editar
+</button> 
+
+<button
           class="small-btn"
           data-delete-player="${esc(player.id)}">
           🗑️ Eliminar
