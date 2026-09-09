@@ -565,7 +565,6 @@ loadPlayerTeamOptions();
       }
     );
   });
-}
 // BOTÓN EDITAR JUGADOR
 el.querySelectorAll("[data-edit-player]").forEach((button) => {
 
@@ -617,6 +616,7 @@ el.querySelectorAll("[data-edit-player]").forEach((button) => {
   });
 
 });
+}  
 /* =========================
    PARTIDOS
 ========================= */
