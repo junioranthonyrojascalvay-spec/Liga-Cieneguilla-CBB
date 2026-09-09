@@ -493,40 +493,80 @@ async function loadAdminPlayers() {
     return;
   }
 
-  el.innerHTML = data.map((player) => `
-    <div class="admin-game">
+  const grupos = {};
 
-      <div>
-        <span class="tag">
-          ${esc(player.category)}
-        </span>
+data.forEach((player) => {
+  if (!grupos[player.category]) {
+    grupos[player.category] = {};
+  }
 
-        <b>${esc(player.name)}</b>
+  if (!grupos[player.category][player.team_name]) {
+    grupos[player.category][player.team_name] = [];
+  }
 
-        <small>
-          ${esc(player.team_name)}
-          ${player.number !== null
-            ? " · Nº " + esc(player.number)
-            : ""}
-        </small>
-      </div>
+  grupos[player.category][player.team_name].push(player);
+});
 
-      <div class="admin-actions">
-        <button
-  class="small-btn"
-  data-edit-player="${esc(player.id)}">
-  ✏️ Editar
-</button> 
+el.innerHTML = Object.entries(grupos)
+  .map(([category, teams]) => `
+    <div class="player-category-group">
 
-<button
-          class="small-btn"
-          data-delete-player="${esc(player.id)}">
-          🗑️ Eliminar
-        </button>
-      </div>
+      <h3>🏀 ${esc(category)}</h3>
+
+      ${Object.entries(teams)
+        .map(([teamName, players]) => `
+          <div class="player-team-group">
+
+            <h4>🏆 ${esc(teamName)}</h4>
+
+            ${players
+              .map((player) => `
+                <div class="admin-game">
+
+                  <div>
+                    <span class="tag">
+                      ${esc(player.category)}
+                    </span>
+
+                    <b>${esc(player.name)}</b>
+
+                    <small>
+                      ${esc(player.team_name)}
+                      ${
+                        player.number !== null
+                          ? " · N° " + esc(player.number)
+                          : ""
+                      }
+                    </small>
+                  </div>
+
+                  <div class="admin-actions">
+
+                    <button
+                      class="small-btn"
+                      data-edit-player="${esc(player.id)}">
+                      ✏️ Editar
+                    </button>
+
+                    <button
+                      class="small-btn"
+                      data-delete-player="${esc(player.id)}">
+                      🗑️ Eliminar
+                    </button>
+
+                  </div>
+
+                </div>
+              `)
+              .join("")}
+
+          </div>
+        `)
+        .join("")}
 
     </div>
-  `).join("");
+  `)
+  .join("");
 
 
   el.querySelectorAll(
