@@ -75,11 +75,49 @@ function renderGames(games) {
     : '<div class="empty">No hay partidos finalizados.</div>';
 }
 async function loadStandings(){
-  const body=$("#standings");
-  if(!db){body.innerHTML='<tr><td>1</td><td>Datos de ejemplo</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>';return;}
-  const {data,error}=await db.from("standings").select("*").eq("category",currentCategory).order("points",{ascending:false}).order("diff",{ascending:false});
-  if(error){body.innerHTML='<tr><td colspan="6">Configura la base de datos para ver la tabla.</td></tr>';return;}
-  body.innerHTML=(data||[]).map((t,i)=>`<tr><td>${i+1}</td><td><b>${esc(t.team_name)}</b></td><td>${t.played}</td><td>${t.wins}</td><td>${t.losses}</td><td><b>${t.points}</b></td></tr>`).join("") || '<tr><td colspan="6">Aún no hay equipos.</td></tr>';
+  const body = $("#standings");
+
+  if (!db) {
+    body.innerHTML =
+      '<tr><td colspan="9">Datos de ejemplo...</td></tr>';
+    return;
+  }
+
+  const { data, error } = await db
+    .from("standings")
+    .select("*")
+    .eq("category", currentCategory)
+    .order("points", { ascending: false })
+    .order("wins", { ascending: false })
+    .order("diff", { ascending: false })
+    .order("points_for", { ascending: false });
+
+  if (error) {
+    console.error("Error cargando posiciones:", error);
+    body.innerHTML =
+      '<tr><td colspan="9">No se pudo cargar la tabla.</td></tr>';
+    return;
+  }
+
+  if (!data || !data.length) {
+    body.innerHTML =
+      '<tr><td colspan="9">Aún no hay equipos.</td></tr>';
+    return;
+  }
+
+  body.innerHTML = data.map((t, i) => `
+    <tr>
+      <td>${i + 1}</td>
+      <td><b>${esc(t.team_name)}</b></td>
+      <td>${t.played ?? 0}</td>
+      <td>${t.wins ?? 0}</td>
+      <td>${t.losses ?? 0}</td>
+      <td>${t.points_for ?? 0}</td>
+      <td>${t.points_against ?? 0}</td>
+      <td>${t.diff ?? 0}</td>
+      <td><b>${t.points ?? 0}</b></td>
+    </tr>
+  `).join("");
 }
 async function loadScorers(){
   const el=$("#topScorers");
