@@ -403,15 +403,39 @@ $("#playerForm").addEventListener(
       return;
     }
 
-    const { error } = await db
-      .from("players")
-      .insert({
-        category,
-        team_name,
-        name,
-        number,
-        photo_url: null
-      });
+    const editingId =
+  e.target.dataset.editingId;
+
+let error;
+
+if (editingId) {
+
+  const result = await db
+    .from("players")
+    .update({
+      category,
+      team_name,
+      name,
+      number
+    })
+    .eq("id", editingId);
+
+  error = result.error;
+
+} else {
+
+  const result = await db
+    .from("players")
+    .insert({
+      category,
+      team_name,
+      name,
+      number,
+      photo_url: null
+    });
+
+  error = result.error;
+}
 
     if (error) {
       $("#playerMsg").textContent =
@@ -424,8 +448,18 @@ $("#playerForm").addEventListener(
 
     e.target.reset();
 
-    loadPlayerTeamOptions();
-    loadAdminPlayers();
+delete e.target.dataset.editingId;
+
+const submitButton =
+  e.target.querySelector('button[type="submit"]');
+
+if (submitButton) {
+  submitButton.textContent = "Guardar jugador";
+}
+
+loadPlayerTeamOptions();
+loadAdminPlayers();
+
   }
 );
 
@@ -532,6 +566,57 @@ loadPlayerTeamOptions();
     );
   });
 }
+// BOTÓN EDITAR JUGADOR
+el.querySelectorAll("[data-edit-player]").forEach((button) => {
+
+  button.addEventListener("click", () => {
+
+    const player = data.find(
+      (item) =>
+        item.id === button.dataset.editPlayer
+    );
+
+    if (!player) return;
+
+    $("#playerCategory").value =
+      player.category;
+
+    loadPlayerTeamOptions().then(() => {
+      $("#playerTeam").value =
+        player.team_name;
+    });
+
+    $("#playerName").value =
+      player.name;
+
+    $("#playerNumber").value =
+      player.number ?? "";
+
+    $("#playerForm").dataset.editingId =
+      player.id;
+
+    $("#playerMsg").textContent =
+      "Editando jugador: " +
+      player.name;
+
+    const submitButton =
+      $("#playerForm").querySelector(
+        'button[type="submit"]'
+      );
+
+    if (submitButton) {
+      submitButton.textContent =
+        "Actualizar jugador";
+    }
+
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth"
+    });
+
+  });
+
+});
 /* =========================
    PARTIDOS
 ========================= */
