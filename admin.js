@@ -43,6 +43,7 @@ async function showSession() {
   if (logged) {
     loadAdminTeams();
     loadAdminGames();
+    loadAdminPlayers();
   }
 }
 
