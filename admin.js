@@ -649,10 +649,7 @@ el.querySelectorAll("[data-edit-player]").forEach((button) => {
         "Actualizar jugador";
     }
 
-    window.scrollTo({
-      top: 0,
-      behavior: "smooth"
-    });
+
 
   });
 
@@ -924,10 +921,7 @@ updateScoreBox();
         $("#awayTeam").value = game.away_team;
       });
 
-      window.scrollTo({
-        top: 0,
-        behavior: "smooth"
-      });
+
 
     });
 
