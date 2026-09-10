@@ -981,62 +981,505 @@ updateScoreBox();
 
   // BOTÓN EN VIVO
   el.querySelectorAll("[data-live]").forEach((b) => {
+async function loadAdminGames() {
+  if (!db) return;
 
-    b.addEventListener("click", () =>
-      setStatus(
-        b.dataset.live,
-        "live"
-      )
-    );
+  const { data, error } = await db
+    .from("games")
+    .select("*")
+    .order("game_date", { ascending: false });
 
+  const el = $("#adminGames");
+  const categoryMenu = $("#adminGameCategories");
+
+  const gameCategories = [
+    "U13 Varones",
+    "U16 Varones",
+    "U18 Varones",
+    "U23 Varones",
+    "Primera División",
+    "Segunda División",
+    "U13 Damas",
+    "U16 Damas",
+    "U18 Damas"
+  ];
+
+  if (error) {
+    if (categoryMenu) categoryMenu.innerHTML = "";
+    el.innerHTML =
+      '<div class="empty">Error cargando partidos.</div>';
+    console.error(error);
+    return;
+  }
+
+  /*
+   * ==========================
+   * MENÚ PRINCIPAL DE CATEGORÍAS
+   * ==========================
+   */
+
+  if (!selectedGameCategory) {
+
+    if (categoryMenu) {
+      categoryMenu.innerHTML = `
+        <div class="admin-category-menu">
+
+          <h3>PARTIDOS REGISTRADOS</h3>
+
+          ${gameCategories
+            .map(
+              (category) => `
+                <button
+                  type="button"
+                  class="small-btn game-category-btn"
+                  data-game-category="${esc(category)}"
+                >
+                  ${esc(category)} →
+                </button>
+              `
+            )
+            .join("")}
+
+        </div>
+      `;
+    }
+
+    el.innerHTML = "";
+
+    if (categoryMenu) {
+      categoryMenu
+        .querySelectorAll(".game-category-btn")
+        .forEach((button) => {
+          button.addEventListener("click", () => {
+            selectedGameCategory =
+              button.dataset.gameCategory;
+
+            loadAdminGames();
+          });
+        });
+    }
+
+    return;
+  }
+
+  /*
+   * ==========================
+   * VISTA DE UNA CATEGORÍA
+   * ==========================
+   */
+
+  if (categoryMenu) {
+    categoryMenu.innerHTML = `
+      <div class="admin-category-view">
+
+        <button
+          type="button"
+          class="small-btn"
+          id="backGameCategories"
+        >
+          ← VOLVER
+        </button>
+
+        <h3>
+          PARTIDOS · ${esc(selectedGameCategory)}
+        </h3>
+
+      </div>
+    `;
+  }
+
+  const visibleGames = (data || []).filter(
+    (game) =>
+      game.category === selectedGameCategory
+  );
+
+  /*
+   * ==========================
+   * CARGAR LOGOS
+   * ==========================
+   */
+
+  const { data: teams } = await db
+    .from("teams")
+    .select("name, logo_url");
+
+  const teamMap = {};
+
+  (teams || []).forEach((team) => {
+    teamMap[team.name] =
+      team.logo_url || "";
   });
 
+  /*
+   * ==========================
+   * LISTA DE PARTIDOS
+   * ==========================
+   */
 
-  // BOTÓN FINALIZAR
-  el.querySelectorAll("[data-finish]").forEach((b) => {
+  el.innerHTML =
+    visibleGames
+      .map((g) => {
 
-    b.addEventListener("click", () =>
-      setStatus(
-        b.dataset.finish,
-        "finished"
-      )
+        const homeLogo =
+          teamMap[g.home_team] || "";
+
+        const awayLogo =
+          teamMap[g.away_team] || "";
+
+        let statusText = "PROGRAMADO";
+
+        if (g.status === "live") {
+          statusText = "EN VIVO";
+        }
+
+        if (g.status === "finished") {
+          statusText = "FINALIZADO";
+        }
+
+        return `
+          <div class="admin-game">
+
+            <div>
+
+              <div
+                style="
+                  display:flex;
+                  align-items:center;
+                  justify-content:center;
+                  gap:10px;
+                  margin:4px 0 8px;
+                  text-align:center;
+                "
+              >
+
+                <div
+                  style="
+                    display:flex;
+                    align-items:center;
+                    gap:6px;
+                    min-width:0;
+                  "
+                >
+
+                  ${
+                    homeLogo
+                      ? `
+                        <img
+                          src="${esc(homeLogo)}"
+                          alt=""
+                          style="
+                            width:34px;
+                            height:34px;
+                            object-fit:contain;
+                          "
+                        >
+                      `
+                      : ""
+                  }
+
+                  <b>
+                    ${esc(g.home_team)}
+                  </b>
+
+                </div>
+
+                <strong
+                  style="
+                    font-size:18px;
+                    white-space:nowrap;
+                  "
+                >
+                  ${g.home_score ?? 0}
+                  -
+                  ${g.away_score ?? 0}
+                </strong>
+
+                <div
+                  style="
+                    display:flex;
+                    align-items:center;
+                    gap:6px;
+                    min-width:0;
+                  "
+                >
+
+                  <b>
+                    ${esc(g.away_team)}
+                  </b>
+
+                  ${
+                    awayLogo
+                      ? `
+                        <img
+                          src="${esc(awayLogo)}"
+                          alt=""
+                          style="
+                            width:34px;
+                            height:34px;
+                            object-fit:contain;
+                          "
+                        >
+                      `
+                      : ""
+                  }
+
+                </div>
+
+              </div>
+
+              <div
+                style="
+                  text-align:center;
+                  font-size:12px;
+                  font-weight:700;
+                  margin-bottom:4px;
+                "
+              >
+                ${statusText}
+              </div>
+
+              <div
+                style="
+                  text-align:center;
+                  font-size:12px;
+                  opacity:.8;
+                "
+              >
+                ${new Date(g.game_date).toLocaleString("es-PE")}
+                ·
+                📍 ${esc(g.venue || "Cancha Cieneguilla")}
+              </div>
+
+            </div>
+
+            <div class="admin-actions">
+
+              <button
+                class="small-btn"
+                data-edit-game="${esc(g.id)}"
+              >
+                ✏️ Editar
+              </button>
+
+              ${
+                g.status !== "finished"
+                  ? `
+                    ${
+                      g.status !== "live"
+                        ? `
+                          <button
+                            class="small-btn"
+                            data-live="${esc(g.id)}"
+                          >
+                            En vivo
+                          </button>
+                        `
+                        : ""
+                    }
+
+                    <button
+                      class="small-btn"
+                      data-finish="${esc(g.id)}"
+                    >
+                      Finalizar
+                    </button>
+                  `
+                  : ""
+              }
+
+              <button
+                class="small-btn"
+                data-delete-game="${esc(g.id)}"
+              >
+                🗑️ Eliminar
+              </button>
+
+            </div>
+
+          </div>
+        `;
+      })
+      .join("") ||
+    '<div class="empty">No hay partidos en esta categoría.</div>';
+
+  /*
+   * ==========================
+   * BOTÓN VOLVER
+   * ==========================
+   */
+
+  const backButton =
+    document.querySelector(
+      "#backGameCategories"
     );
 
-  });
-
-
-  // BOTÓN ELIMINAR
-  el.querySelectorAll("[data-delete-game]").forEach((b) => {
-
-    b.addEventListener("click", async () => {
-
-      const game = (data || []).find(
-        (item) => item.id === b.dataset.deleteGame
-      );
-
-      if (!game) return;
-
-      const confirmar = confirm(
-        `¿Eliminar el partido ${game.home_team} vs ${game.away_team}?`
-      );
-
-      if (!confirmar) return;
-
-      const { error } = await db
-        .from("games")
-        .delete()
-        .eq("id", game.id);
-
-      if (error) {
-        alert("Error al eliminar: " + error.message);
-        return;
-      }
-
+  if (backButton) {
+    backButton.addEventListener("click", () => {
+      selectedGameCategory = null;
       loadAdminGames();
+    });
+  }
+
+  /*
+   * ==========================
+   * BOTÓN EDITAR
+   * ==========================
+   */
+
+  el
+    .querySelectorAll("[data-edit-game]")
+    .forEach((b) => {
+
+      b.addEventListener("click", () => {
+
+        const game =
+          (data || []).find(
+            (item) =>
+              item.id ===
+              b.dataset.editGame
+          );
+
+        if (!game) return;
+
+        $("#gameCategory").value =
+          game.category;
+
+        $("#gameDate").value =
+          new Date(game.game_date)
+            .toISOString()
+            .slice(0, 16);
+
+        $("#venue").value =
+          game.venue || "";
+
+        $("#gameStatus").value =
+          game.status;
+
+        $("#homeScore").value =
+          game.home_score ?? 0;
+
+        $("#awayScore").value =
+          game.away_score ?? 0;
+
+        updateScoreBox();
+
+        $("#gameForm").dataset.editingId =
+          game.id;
+
+        $("#gameMsg").textContent =
+          "Editando partido: " +
+          game.home_team +
+          " vs " +
+          game.away_team;
+
+        loadGameTeamOptions().then(() => {
+
+          $("#homeTeam").value =
+            game.home_team;
+
+          $("#awayTeam").value =
+            game.away_team;
+
+        });
+
+      });
 
     });
 
-  });
+  /*
+   * ==========================
+   * BOTÓN EN VIVO
+   * ==========================
+   */
+
+  el
+    .querySelectorAll("[data-live]")
+    .forEach((b) => {
+
+      b.addEventListener("click", () => {
+
+        setStatus(
+          b.dataset.live,
+          "live"
+        );
+
+      });
+
+    });
+
+  /*
+   * ==========================
+   * BOTÓN FINALIZAR
+   * ==========================
+   */
+
+  el
+    .querySelectorAll("[data-finish]")
+    .forEach((b) => {
+
+      b.addEventListener("click", () => {
+
+        setStatus(
+          b.dataset.finish,
+          "finished"
+        );
+
+      });
+
+    });
+
+  /*
+   * ==========================
+   * BOTÓN ELIMINAR
+   * ==========================
+   */
+
+  el
+    .querySelectorAll("[data-delete-game]")
+    .forEach((b) => {
+
+      b.addEventListener(
+        "click",
+        async () => {
+
+          const game =
+            (data || []).find(
+              (item) =>
+                item.id ===
+                b.dataset.deleteGame
+            );
+
+          if (!game) return;
+
+          const confirmar =
+            confirm(
+              `¿Eliminar el partido ${game.home_team} vs ${game.away_team}?`
+            );
+
+          if (!confirmar) return;
+
+          const { error } =
+            await db
+              .from("games")
+              .delete()
+              .eq("id", game.id);
+
+          if (error) {
+
+            alert(
+              "Error al eliminar: " +
+              error.message
+            );
+
+            return;
+          }
+
+          loadAdminGames();
+
+        }
+      );
+
+    });
 
 }
 
