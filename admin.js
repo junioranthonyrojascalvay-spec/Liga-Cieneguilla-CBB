@@ -1920,27 +1920,7 @@ async function loadAdminGames() {
           const { error } =
             await db
               .from("games")
-              .delete()
-              .eq("id", game.id);
 
-          if (error) {
-
-            alert(
-              "Error al eliminar: " +
-              error.message
-            );
-
-            return;
-          }
-
-          loadAdminGames();
-
-        }
-      );
-
-    });
-
-}
 /* =========================
    CAMBIAR ESTADO
 ========================= */
@@ -1999,7 +1979,6 @@ async function setStatus(id, status) {
   } else {
     loadAdminGames();
   }
-
 }
 
 
