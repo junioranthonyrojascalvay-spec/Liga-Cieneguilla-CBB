@@ -11,6 +11,7 @@ const db = configured
       window.SUPABASE_ANON_KEY
     )
   : null;
+alert("DB OK");
 
 const $ = (s) => document.querySelector(s);
 
