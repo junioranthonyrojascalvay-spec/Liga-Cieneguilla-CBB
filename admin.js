@@ -721,7 +721,7 @@ if (editingId) {
 /* =========================
    CARGAR PARTIDOS
 ========================= */
-
+let selectedGameCategory = null;
 async function loadAdminGames() {
   if (!db) return;
 
@@ -732,8 +732,59 @@ async function loadAdminGames() {
     .limit(30);
 
   const el = $("#adminGames");
+const categoryMenu = $("#adminGameCategories");
 
-  if (error) {
+const gameCategories = [
+  "U13 Varones",
+  "U16 Varones",
+  "U18 Varones",
+  "U23 Varones",
+  "Primera División",
+  "Segunda División",
+  "U13 Damas",
+  "U16 Damas",
+  "U18 Damas"
+];
+
+if (categoryMenu) {
+  categoryMenu.innerHTML = `
+    <div class="admin-category-menu">
+      <h3>PARTIDOS REGISTRADOS</h3>
+      ${gameCategories
+        .map(
+          (category) => `
+            <button
+              type="button"
+              class="small-btn game-category-btn"
+              data-game-category="${category}"
+            >
+              ${category} →
+            </button>
+          `
+        )
+        .join("")}
+    </div>
+  `;
+}
+if (categoryMenu) {
+  categoryMenu
+    .querySelectorAll(".game-category-btn")
+    .forEach((button) => {
+      button.addEventListener("click", () => {
+        selectedGameCategory =
+          button.dataset.gameCategory;
+
+        loadAdminGames();
+      });
+    });
+}
+const visibleGames = selectedGameCategory
+  ? (data || []).filter(
+      (game) => game.category === selectedGameCategory
+    )
+  : [];
+if (error) {
+
     el.innerHTML =
       '<div class="empty">Error cargando partidos.</div>';
     console.error(error);
@@ -752,7 +803,7 @@ async function loadAdminGames() {
   });
 
   el.innerHTML =
-    (data || []).map((g) => {
+    visibleGames.map((g) => {
 
       const homeLogo = teamMap[g.home_team] || "";
       const awayLogo = teamMap[g.away_team] || "";
