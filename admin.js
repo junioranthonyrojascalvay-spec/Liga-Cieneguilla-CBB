@@ -1,3 +1,4 @@
+alert("ADMIN.JS CARGÓ");
 const configured =
   window.SUPABASE_URL &&
   !window.SUPABASE_URL.includes("TU-PROYECTO") &&
