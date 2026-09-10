@@ -12,3 +12,41 @@ footer{border-top:1px solid var(--line);padding:30px max(18px,calc((100% - 1204p
 .admin-main{padding:45px 18px}.admin-login{max-width:520px;margin:40px auto;padding:28px}.admin-login h1,.admin-top h1{margin:5px 0 10px}.admin-login form{display:grid;gap:13px;margin-top:24px}.admin-login label,.form-grid label{display:grid;gap:7px;font-size:12px;font-weight:800;color:#ddd}input,select{background:#0d0f12;color:#fff;border:1px solid var(--line);border-radius:8px;padding:12px;min-height:44px}.admin-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}.admin-grid .panel{padding:0}.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:13px;padding:18px}.form-grid .primary-btn,.form-msg{grid-column:1/-1}.admin-top{display:flex;justify-content:space-between;align-items:end;margin-bottom:20px}.admin-game{display:flex;justify-content:space-between;gap:12px;padding:15px;border-bottom:1px solid var(--line)}.admin-game b,.admin-game small{display:block;margin-top:7px}.admin-actions{display:flex;gap:6px;align-items:center}.small-btn{min-height:36px;padding:0 10px;font-size:11px}.tag{display:inline-block;padding:4px 7px;border-radius:99px;background:#272b31;font-size:10px;font-weight:900}.hidden{display:none!important}.form-msg{font-size:12px;color:#ff777b;min-height:18px}.back-link{font-weight:800;font-size:13px}
 @media(max-width:800px){nav{display:none;position:absolute;top:72px;left:0;right:0;background:#0b0c0e;padding:15px 20px;flex-direction:column;align-items:stretch;gap:4px;border-bottom:1px solid var(--line)}nav.open{display:flex}nav a{padding:13px}.menu-btn{display:block}.hero{margin:0;min-height:500px}.hero-badge{display:none}.category-grid{grid-template-columns:1fr 1fr}.two-col,.admin-grid{grid-template-columns:1fr}.game-row{grid-template-columns:70px 1fr;gap:10px}.game-score{grid-column:2;text-align:left}.teams b{min-width:0}.teams span{margin:0 6px}.form-grid{grid-template-columns:1fr}.form-grid .primary-btn,.form-msg{grid-column:auto}footer{flex-direction:column;gap:18px;text-align:center}}
 @media(max-width:420px){.hero h1{font-size:38px}.category-grid{grid-template-columns:1fr}.section{padding:32px 12px}.hero{padding:45px 22px}.brand b{font-size:13px}}
+/* ===== ADMIN - LISTAS COMPACTAS ===== */
+
+#adminPlayers .player-line {
+  padding: 10px 8px !important;
+  margin: 0 !important;
+  min-height: 0 !important;
+  gap: 8px !important;
+}
+
+#adminPlayers .player-line b {
+  font-size: 17px !important;
+  line-height: 1.2 !important;
+}
+
+#adminPlayers .player-line span {
+  font-size: 13px !important;
+  line-height: 1.2 !important;
+}
+
+#adminPlayers .player-line .small-btn {
+  padding: 7px 9px !important;
+  font-size: 12px !important;
+}
+
+#adminPlayers .player-line + .player-line {
+  border-top: 1px solid var(--line);
+}
+
+#adminPlayers .players-list {
+  gap: 0 !important;
+}
+
+/* Espacio pequeño entre jugadores y grupos */
+#adminPlayers h3,
+#adminPlayers h4 {
+  margin-top: 10px !important;
+  margin-bottom: 5px !important;
+}
