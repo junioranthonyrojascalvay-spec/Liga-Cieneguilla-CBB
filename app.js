@@ -2,7 +2,7 @@ const hasConfig = window.SUPABASE_URL && !window.SUPABASE_URL.includes("TU-PROYE
   window.SUPABASE_ANON_KEY && !window.SUPABASE_ANON_KEY.includes("TU_CLAVE");
 
 const db = hasConfig ? window.supabase.createClient(window.SUPABASE_URL, window.SUPABASE_ANON_KEY) : null;
-let currentCategory = "Sub-13";
+let currentCategory = "U13 Varones";
 
 const $ = (s) => document.querySelector(s);
 const esc = (v) => String(v ?? "").replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
