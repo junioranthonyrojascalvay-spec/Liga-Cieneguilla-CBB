@@ -650,12 +650,28 @@ loadAdminPlayers();
 
 
 /* CARGAR JUGADORES */
-
 async function loadAdminPlayers() {
-
   if (!db) return;
 
   const el = $("#adminPlayers");
+
+  const CATEGORIAS = [
+    "U13 Varones",
+    "U16 Varones",
+    "U18 Varones",
+    "U23 Varones",
+    "Primera División",
+    "Segunda División",
+    "U13 Damas",
+    "U16 Damas",
+    "U18 Damas"
+  ];
+
+  const categoriaActual =
+    el.dataset.playerCategory || "";
+
+  const equipoActual =
+    el.dataset.playerTeam || "";
 
   const { data, error } = await db
     .from("players")
@@ -671,87 +687,296 @@ async function loadAdminPlayers() {
     return;
   }
 
-  if (!data || !data.length) {
-    el.innerHTML =
-      '<div class="empty">Aún no hay jugadores registrados.</div>';
+  const players = data || [];
+
+  /* =========================
+     NIVEL 1: CATEGORÍAS
+  ========================= */
+
+  if (!categoriaActual) {
+    el.innerHTML = `
+      <div class="admin-navigation">
+
+        <h3>JUGADORES</h3>
+
+        <div class="admin-category-menu">
+
+          ${CATEGORIAS.map(
+            (cat) => `
+              <button
+                class="small-btn"
+                data-player-category="${esc(cat)}">
+                ${esc(cat)}
+              </button>
+            `
+          ).join("")}
+
+        </div>
+
+      </div>
+    `;
+
+    el.querySelectorAll(
+      "[data-player-category]"
+    ).forEach((button) => {
+
+      button.addEventListener("click", () => {
+
+        el.dataset.playerCategory =
+          button.dataset.playerCategory;
+
+        delete el.dataset.playerTeam;
+
+        loadAdminPlayers();
+
+      });
+
+    });
+
     return;
   }
 
-  const grupos = {};
+  /* =========================
+     NIVEL 2: EQUIPOS
+  ========================= */
 
-data.forEach((player) => {
-  if (!grupos[player.category]) {
-    grupos[player.category] = {};
-  }
+  if (!equipoActual) {
 
-  if (!grupos[player.category][player.team_name]) {
-    grupos[player.category][player.team_name] = [];
-  }
+    const { data: teams, error: teamsError } =
+      await db
+        .from("teams")
+        .select("name")
+        .eq("category", categoriaActual)
+        .order("name");
 
-  grupos[player.category][player.team_name].push(player);
-});
+    if (teamsError) {
+      el.innerHTML =
+        '<div class="empty">Error cargando equipos.</div>';
 
-el.innerHTML = Object.entries(grupos)
-  .map(([category, teams]) => `
-    <div class="player-category-group">
+      console.error(teamsError);
 
-      <h3>🏀 ${esc(category)}</h3>
+      return;
+    }
 
-      ${Object.entries(teams)
-        .map(([teamName, players]) => `
-          <div class="player-team-group">
+    const teamNames = [
+      ...new Set(
+        (teams || []).map(
+          (team) => team.name
+        )
+      )
+    ];
 
-            <h4>🏆 ${esc(teamName)}</h4>
+    /* Equipos encontrados directamente
+       desde los jugadores */
+    players
+      .filter(
+        (player) =>
+          player.category === categoriaActual
+      )
+      .forEach((player) => {
 
-            ${players
-              .map((player) => `
-                <div class="admin-game">
+        if (
+          player.team_name &&
+          !teamNames.includes(player.team_name)
+        ) {
+          teamNames.push(
+            player.team_name
+          );
+        }
 
-                  <div>
-                    <span class="tag">
-                      ${esc(player.category)}
-                    </span>
+      });
 
-                    <b>${esc(player.name)}</b>
+    teamNames.sort((a, b) =>
+      a.localeCompare(b)
+    );
 
-                    <small>
-                      ${esc(player.team_name)}
-                      ${
-                        player.number !== null
-                          ? " · N° " + esc(player.number)
-                          : ""
-                      }
-                    </small>
-                  </div>
+    el.innerHTML = `
+      <div class="admin-navigation">
 
-                  <div class="admin-actions">
+        <button
+          class="small-btn"
+          data-player-back>
+          ← VOLVER
+        </button>
 
+        <h3>
+          JUGADORES → ${esc(categoriaActual)}
+        </h3>
+
+        ${
+          teamNames.length
+            ? teamNames
+                .map(
+                  (teamName) => `
                     <button
                       class="small-btn"
-                      data-edit-player="${esc(player.id)}">
-                      ✏️ Editar
+                      data-player-team="${esc(teamName)}">
+                      🏀 ${esc(teamName)}
                     </button>
+                  `
+                )
+                .join("")
+            : `
+              <div class="empty">
+                Aún no hay equipos en esta categoría.
+              </div>
+            `
+        }
 
-                    <button
-                      class="small-btn"
-                      data-delete-player="${esc(player.id)}">
-                      🗑️ Eliminar
-                    </button>
+      </div>
+    `;
+
+    /* VOLVER A CATEGORÍAS */
+
+    const backButton =
+      el.querySelector(
+        "[data-player-back]"
+      );
+
+    if (backButton) {
+
+      backButton.addEventListener(
+        "click",
+        () => {
+
+          delete el.dataset.playerCategory;
+          delete el.dataset.playerTeam;
+
+          loadAdminPlayers();
+
+        }
+      );
+
+    }
+
+    /* ENTRAR A EQUIPO */
+
+    el.querySelectorAll(
+      "[data-player-team]"
+    ).forEach((button) => {
+
+      button.addEventListener(
+        "click",
+        () => {
+
+          el.dataset.playerTeam =
+            button.dataset.playerTeam;
+
+          loadAdminPlayers();
+
+        }
+      );
+
+    });
+
+    return;
+  }
+
+  /* =========================
+     NIVEL 3: JUGADORES
+  ========================= */
+
+  const teamPlayers =
+    players.filter(
+      (player) =>
+        player.category === categoriaActual &&
+        player.team_name === equipoActual
+    );
+
+  el.innerHTML = `
+    <div class="admin-navigation">
+
+      <button
+        class="small-btn"
+        data-player-back-team>
+        ← VOLVER
+      </button>
+
+      <h3>
+        ${esc(categoriaActual)}
+        → ${esc(equipoActual)}
+      </h3>
+
+      ${
+        teamPlayers.length
+          ? teamPlayers
+              .map(
+                (player) => `
+                  <div class="admin-game">
+
+                    <div>
+                      <b>
+                        ${esc(player.name)}
+                      </b>
+
+                      <small>
+                        ${
+                          player.number !== null &&
+                          player.number !== undefined
+                            ? "N° " +
+                              esc(player.number)
+                            : ""
+                        }
+                      </small>
+                    </div>
+
+                    <div class="admin-actions">
+
+                      <button
+                        class="small-btn"
+                        data-edit-player="${esc(player.id)}">
+                        ✏️ Editar
+                      </button>
+
+                      <button
+                        class="small-btn"
+                        data-delete-player="${esc(player.id)}">
+                        🗑️ Eliminar
+                      </button>
+
+                    </div>
 
                   </div>
-
-                </div>
-              `)
-              .join("")}
-
-          </div>
-        `)
-        .join("")}
+                `
+              )
+              .join("")
+          : `
+            <div class="empty">
+              Este equipo aún no tiene jugadores registrados.
+            </div>
+          `
+      }
 
     </div>
-  `)
-  .join("");
+  `;
 
+  /* =========================
+     VOLVER A EQUIPOS
+  ========================= */
+
+  const backTeamButton =
+    el.querySelector(
+      "[data-player-back-team]"
+    );
+
+  if (backTeamButton) {
+
+    backTeamButton.addEventListener(
+      "click",
+      () => {
+
+        delete el.dataset.playerTeam;
+
+        loadAdminPlayers();
+
+      }
+    );
+
+  }
+
+  /* =========================
+     ELIMINAR JUGADOR
+  ========================= */
 
   el.querySelectorAll(
     "[data-delete-player]"
@@ -761,11 +986,14 @@ el.innerHTML = Object.entries(grupos)
       "click",
       async () => {
 
-        const player = data.find(
-          (item) =>
-            item.id ===
-            button.dataset.deletePlayer
-        );
+        const player =
+          players.find(
+            (item) =>
+              String(item.id) ===
+              String(
+                button.dataset.deletePlayer
+              )
+          );
 
         if (!player) return;
 
@@ -775,141 +1003,96 @@ el.innerHTML = Object.entries(grupos)
 
         if (!confirmar) return;
 
-        const { error } = await db
-          .from("players")
-          .delete()
-          .eq("id", player.id);
+        const { error } =
+          await db
+            .from("players")
+            .delete()
+            .eq("id", player.id);
 
         if (error) {
           alert(error.message);
           return;
         }
 
-        loadAdminPlayers()
-loadPlayerTeamOptions();
+        await loadAdminPlayers();
+
+        loadPlayerTeamOptions();
+
       }
     );
+
   });
-// BOTÓN EDITAR JUGADOR
-el.querySelectorAll("[data-edit-player]").forEach((button) => {
 
-  button.addEventListener("click", () => {
+  /* =========================
+     EDITAR JUGADOR
+  ========================= */
 
-    const player = data.find(
-      (item) =>
-        item.id === button.dataset.editPlayer
+  el.querySelectorAll(
+    "[data-edit-player]"
+  ).forEach((button) => {
+
+    button.addEventListener(
+      "click",
+      () => {
+
+        const player =
+          players.find(
+            (item) =>
+              String(item.id) ===
+              String(
+                button.dataset.editPlayer
+              )
+          );
+
+        if (!player) return;
+
+        $("#playerCategory").value =
+          player.category;
+
+        loadPlayerTeamOptions().then(() => {
+
+          $("#playerTeam").value =
+            player.team_name;
+
+        });
+
+        $("#playerName").value =
+          player.name;
+
+        $("#playerNumber").value =
+          player.number ?? "";
+
+        $("#playerForm").dataset.editingId =
+          player.id;
+
+        $("#playerMsg").textContent =
+          "Editando jugador: " +
+          player.name;
+
+        const submitButton =
+          $("#playerForm").querySelector(
+            'button[type="submit"]'
+          );
+
+        if (submitButton) {
+
+          submitButton.textContent =
+            "Actualizar jugador";
+
+        }
+
+      }
     );
 
-    if (!player) return;
-
-    $("#playerCategory").value =
-      player.category;
-
-    loadPlayerTeamOptions().then(() => {
-      $("#playerTeam").value =
-        player.team_name;
-    });
-
-    $("#playerName").value =
-      player.name;
-
-    $("#playerNumber").value =
-      player.number ?? "";
-
-    $("#playerForm").dataset.editingId =
-      player.id;
-
-    $("#playerMsg").textContent =
-      "Editando jugador: " +
-      player.name;
-
-    const submitButton =
-      $("#playerForm").querySelector(
-        'button[type="submit"]'
-      );
-
-    if (submitButton) {
-      submitButton.textContent =
-        "Actualizar jugador";
-    }
-
-    window.scrollTo({
-      top: 0,
-      behavior: "smooth"
-    });
-
   });
 
-});
-}  
-/* =========================
-   PARTIDOS
-========================= */
-
-$("#gameForm").addEventListener("submit", async (e) => {
-
-  e.preventDefault();
-
-  if (!db) {
-    $("#gameMsg").textContent =
-      "Conecta Supabase primero.";
-    return;
-  }
-
-  const payload = {
-    category: $("#gameCategory").value,
-    game_date: new Date(
-      $("#gameDate").value
-    ).toISOString(),
-
-    home_team: $("#homeTeam").value.trim(),
-    away_team: $("#awayTeam").value.trim(),
-
-    venue: $("#venue").value.trim(),
-
-    status: $("#gameStatus").value,
-
-   home_score: Number($("#homeScore").value) || 0,
-away_score: Number($("#awayScore").value) || 0
-  };
-
-  let error;
-
-const editingId = e.target.dataset.editingId;
-
-if (editingId) {
-  const result = await db
-    .from("games")
-    .update(payload)
-    .eq("id", editingId);
-
-  error = result.error;
-} else {
-  const result = await db
-    .from("games")
-    .insert(payload);
-
-  error = result.error;
 }
-  $("#gameMsg").textContent =
-    error
-      ? error.message
-      : "Partido guardado correctamente.";
-
-  if (!error) {
-    e.target.reset();
-    delete e.target.dataset.editingId;
-    loadAdminGames();
-  }
-
-});
-
 
 /* =========================
    CARGAR PARTIDOS
 ========================= */
 
-async function loadAdminGames() {
+async function loadAdminGamesOld() {
   if (!db) return;
 
   const { data, error } = await db
