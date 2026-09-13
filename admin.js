@@ -862,17 +862,31 @@ async function loadAdminGames() {
               ✏️ Editar
             </button>
 
-            <button
-              class="small-btn"
-              data-live="${esc(g.id)}">
-              En vivo
-            </button>
+            ${
+  g.status !== "live" && g.status !== "finished"
+    ? `
+      <button
+        class="small-btn"
+        data-live="${esc(g.id)}">
+        En vivo
+      </button>
 
-            <button
-              class="small-btn"
-              data-finish="${esc(g.id)}">
-              Finalizar
-            </button>
+      <button
+        class="small-btn"
+        data-finish="${esc(g.id)}">
+        Finalizar
+      </button>
+    `
+    : g.status === "live"
+      ? `
+        <button
+          class="small-btn"
+          data-finish="${esc(g.id)}">
+          Finalizar
+        </button>
+      `
+      : ""
+}
 
             <button
               class="small-btn"
