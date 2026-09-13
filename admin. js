@@ -192,192 +192,8 @@ if (editingId) {
 /* =========================
    CARGAR EQUIPOS
 ========================= */
-let adminTeamsCategory = null;
 
 async function loadAdminTeams() {
-  if (!db) return;
-
-  const el = $("#adminTeams");
-
-  const { data, error } = await db
-    .from("teams")
-    .select("*")
-    .order("category", { ascending: true })
-    .order("name", { ascending: true });
-
-  if (error) {
-    el.innerHTML =
-      '<div class="empty">Error cargando equipos.</div>';
-    console.error(error);
-    return;
-  }
-
-  if (!data || !data.length) {
-    el.innerHTML =
-      '<div class="empty">Aún no hay equipos registrados.</div>';
-    return;
-  }
-
-  const categorias = [
-    "U13 Varones",
-    "U16 Varones",
-    "U18 Varones",
-    "U23 Varones",
-    "Primera División",
-    "Segunda División",
-    "U13 Damas",
-    "U16 Damas",
-    "U18 Damas"
-  ];
-
-  if (!adminTeamsCategory) {
-    el.innerHTML = `
-      <div style="display:flex;flex-direction:column;gap:8px;">
-        ${categorias.map((cat) => `
-          <button
-            type="button"
-            class="small-btn"
-            data-team-category="${esc(cat)}"
-            style="width:100%;text-align:left;padding:12px;">
-            ${esc(cat)}
-          </button>
-        `).join("")}
-      </div>
-    `;
-
-    el.querySelectorAll("[data-team-category]").forEach((button) => {
-      button.addEventListener("click", () => {
-        adminTeamsCategory = button.dataset.teamCategory;
-        loadAdminTeams();
-      });
-    });
-
-    return;
-  }
-
-  const equipos = data.filter(
-    (team) => team.category === adminTeamsCategory
-  );
-
-  el.innerHTML = `
-    <div style="margin-bottom:12px;">
-      <button
-        type="button"
-        class="small-btn"
-        id="backTeamsCategories">
-        ← VOLVER
-      </button>
-    </div>
-
-    <div class="panel-title" style="margin-bottom:12px;">
-      <span>${esc(adminTeamsCategory)}</span>
-    </div>
-
-    ${
-      !equipos.length
-        ? '<div class="empty">Aún no hay equipos en esta categoría.</div>'
-        : equipos.map((team) => {
-            const logo = team.logo_url
-              ? `<img
-                   src="${esc(team.logo_url)}"
-                   alt=""
-                   width="48"
-                   height="48"
-                   style="object-fit:contain;border-radius:8px;">`
-              : "";
-
-            return `
-              <div class="admin-game">
-                <div style="display:flex;align-items:center;gap:12px;">
-                  ${logo}
-
-                  <div style="flex:1;">
-                    <span class="tag">${esc(team.category)}</span>
-                    <div>
-                      <b>${esc(team.name)}</b>
-                    </div>
-                  </div>
-
-                  <div style="display:flex;gap:6px;flex-wrap:wrap;">
-                    <button
-                      class="small-btn"
-                      data-edit-team="${esc(team.id)}">
-                      Editar
-                    </button>
-
-                    <button
-                      class="small-btn"
-                      data-delete-team="${esc(team.id)}">
-                      Eliminar
-                    </button>
-                  </div>
-                </div>
-              </div>
-            `;
-          }).join("")
-    }
-  `;
-
-  $("#backTeamsCategories").addEventListener("click", () => {
-    adminTeamsCategory = null;
-    loadAdminTeams();
-  });
-
-  el.querySelectorAll("[data-edit-team]").forEach((button) => {
-    button.addEventListener("click", () => {
-      const team = data.find(
-        (item) => item.id === button.dataset.editTeam
-      );
-
-      if (!team) return;
-
-      $("#teamCategory").value = team.category;
-      $("#teamName").value = team.name;
-      $("#teamLogoUrl").value = team.logo_url || "";
-
-      $("#teamForm").dataset.editingId = team.id;
-
-      const submitButton =
-        $("#teamForm").querySelector('button[type="submit"]');
-
-      if (submitButton) {
-        submitButton.textContent = "Actualizar equipo";
-      }
-
-      $("#teamMsg").textContent =
-        "Editando: " + team.name;
-    });
-  });
-
-  el.querySelectorAll("[data-delete-team]").forEach((button) => {
-    button.addEventListener("click", async () => {
-      const team = data.find(
-        (item) => item.id === button.dataset.deleteTeam
-      );
-
-      if (!team) return;
-
-      const confirmar = confirm(
-        `¿Eliminar el equipo "${team.name}"?`
-      );
-
-      if (!confirmar) return;
-
-      const { error } = await db
-        .from("teams")
-        .delete()
-        .eq("id", team.id);
-
-      if (error) {
-        alert(error.message);
-        return;
-      }
-
-      loadAdminTeams();
-    });
-  });
-}
-async function loadAdminTeamsOld() {
   if (!db) return;
 
   const el = $("#adminTeams");
@@ -647,31 +463,13 @@ loadAdminPlayers();
 
   }
 );
-
-
 /* CARGAR JUGADORES */
+
 async function loadAdminPlayers() {
+
   if (!db) return;
 
   const el = $("#adminPlayers");
-
-  const CATEGORIAS = [
-    "U13 Varones",
-    "U16 Varones",
-    "U18 Varones",
-    "U23 Varones",
-    "Primera División",
-    "Segunda División",
-    "U13 Damas",
-    "U16 Damas",
-    "U18 Damas"
-  ];
-
-  const categoriaActual =
-    el.dataset.playerCategory || "";
-
-  const equipoActual =
-    el.dataset.playerTeam || "";
 
   const { data, error } = await db
     .from("players")
@@ -687,234 +485,54 @@ async function loadAdminPlayers() {
     return;
   }
 
-  const players = data || [];
-
-  /* =========================
-     NIVEL 1: CATEGORÍAS
-  ========================= */
-
-  if (!categoriaActual) {
-    el.innerHTML = `
-      <div class="admin-navigation">
-
-        <h3>JUGADORES</h3>
-
-        <div class="admin-category-menu">
-
-          ${CATEGORIAS.map(
-            (cat) => `
-              <button
-                class="small-btn"
-                data-player-category="${esc(cat)}">
-                ${esc(cat)}
-              </button>
-            `
-          ).join("")}
-
-        </div>
-
-      </div>
-    `;
-
-    el.querySelectorAll(
-      "[data-player-category]"
-    ).forEach((button) => {
-
-      button.addEventListener("click", () => {
-
-        el.dataset.playerCategory =
-          button.dataset.playerCategory;
-
-        delete el.dataset.playerTeam;
-
-        loadAdminPlayers();
-
-      });
-
-    });
-
+  if (!data || !data.length) {
+    el.innerHTML =
+      '<div class="empty">Aún no hay jugadores registrados.</div>';
     return;
   }
 
-  /* =========================
-     NIVEL 2: EQUIPOS
-  ========================= */
+  const grupos = {};
 
-  if (!equipoActual) {
-
-    const { data: teams, error: teamsError } =
-      await db
-        .from("teams")
-        .select("name")
-        .eq("category", categoriaActual)
-        .order("name");
-
-    if (teamsError) {
-      el.innerHTML =
-        '<div class="empty">Error cargando equipos.</div>';
-
-      console.error(teamsError);
-
-      return;
+  data.forEach((player) => {
+    if (!grupos[player.category]) {
+      grupos[player.category] = {};
     }
 
-    const teamNames = [
-      ...new Set(
-        (teams || []).map(
-          (team) => team.name
-        )
-      )
-    ];
-
-    /* Equipos encontrados directamente
-       desde los jugadores */
-    players
-      .filter(
-        (player) =>
-          player.category === categoriaActual
-      )
-      .forEach((player) => {
-
-        if (
-          player.team_name &&
-          !teamNames.includes(player.team_name)
-        ) {
-          teamNames.push(
-            player.team_name
-          );
-        }
-
-      });
-
-    teamNames.sort((a, b) =>
-      a.localeCompare(b)
-    );
-
-    el.innerHTML = `
-      <div class="admin-navigation">
-
-        <button
-          class="small-btn"
-          data-player-back>
-          ← VOLVER
-        </button>
-
-        <h3>
-          JUGADORES → ${esc(categoriaActual)}
-        </h3>
-
-        ${
-          teamNames.length
-            ? teamNames
-                .map(
-                  (teamName) => `
-                    <button
-                      class="small-btn"
-                      data-player-team="${esc(teamName)}">
-                      🏀 ${esc(teamName)}
-                    </button>
-                  `
-                )
-                .join("")
-            : `
-              <div class="empty">
-                Aún no hay equipos en esta categoría.
-              </div>
-            `
-        }
-
-      </div>
-    `;
-
-    /* VOLVER A CATEGORÍAS */
-
-    const backButton =
-      el.querySelector(
-        "[data-player-back]"
-      );
-
-    if (backButton) {
-
-      backButton.addEventListener(
-        "click",
-        () => {
-
-          delete el.dataset.playerCategory;
-          delete el.dataset.playerTeam;
-
-          loadAdminPlayers();
-
-        }
-      );
-
+    if (!grupos[player.category][player.team_name]) {
+      grupos[player.category][player.team_name] = [];
     }
 
-    /* ENTRAR A EQUIPO */
+    grupos[player.category][player.team_name].push(player);
+  });
 
-    el.querySelectorAll(
-      "[data-player-team]"
-    ).forEach((button) => {
+  el.innerHTML = Object.entries(grupos)
+    .map(([category, teams]) => `
+      <div class="player-category-group">
 
-      button.addEventListener(
-        "click",
-        () => {
+        <h3>🏀 ${esc(category)}</h3>
 
-          el.dataset.playerTeam =
-            button.dataset.playerTeam;
+        ${Object.entries(teams)
+          .map(([teamName, players]) => `
+            <div class="player-team-group">
 
-          loadAdminPlayers();
+              <h4>🏆 ${esc(teamName)}</h4>
 
-        }
-      );
-
-    });
-
-    return;
-  }
-
-  /* =========================
-     NIVEL 3: JUGADORES
-  ========================= */
-
-  const teamPlayers =
-    players.filter(
-      (player) =>
-        player.category === categoriaActual &&
-        player.team_name === equipoActual
-    );
-
-  el.innerHTML = `
-    <div class="admin-navigation">
-
-      <button
-        class="small-btn"
-        data-player-back-team>
-        ← VOLVER
-      </button>
-
-      <h3>
-        ${esc(categoriaActual)}
-        → ${esc(equipoActual)}
-      </h3>
-
-      ${
-        teamPlayers.length
-          ? teamPlayers
-              .map(
-                (player) => `
+              ${players
+                .map((player) => `
                   <div class="admin-game">
 
                     <div>
-                      <b>
-                        ${esc(player.name)}
-                      </b>
+                      <span class="tag">
+                        ${esc(player.category)}
+                      </span>
+
+                      <b>${esc(player.name)}</b>
 
                       <small>
+                        ${esc(player.team_name)}
                         ${
-                          player.number !== null &&
-                          player.number !== undefined
-                            ? "N° " +
-                              esc(player.number)
+                          player.number !== null
+                            ? " · N° " + esc(player.number)
                             : ""
                         }
                       </small>
@@ -937,46 +555,17 @@ async function loadAdminPlayers() {
                     </div>
 
                   </div>
-                `
-              )
-              .join("")
-          : `
-            <div class="empty">
-              Este equipo aún no tiene jugadores registrados.
+                `)
+                .join("")}
+
             </div>
-          `
-      }
+          `)
+          .join("")}
 
-    </div>
-  `;
+      </div>
+    `)
+    .join("");
 
-  /* =========================
-     VOLVER A EQUIPOS
-  ========================= */
-
-  const backTeamButton =
-    el.querySelector(
-      "[data-player-back-team]"
-    );
-
-  if (backTeamButton) {
-
-    backTeamButton.addEventListener(
-      "click",
-      () => {
-
-        delete el.dataset.playerTeam;
-
-        loadAdminPlayers();
-
-      }
-    );
-
-  }
-
-  /* =========================
-     ELIMINAR JUGADOR
-  ========================= */
 
   el.querySelectorAll(
     "[data-delete-player]"
@@ -986,14 +575,11 @@ async function loadAdminPlayers() {
       "click",
       async () => {
 
-        const player =
-          players.find(
-            (item) =>
-              String(item.id) ===
-              String(
-                button.dataset.deletePlayer
-              )
-          );
+        const player = data.find(
+          (item) =>
+            item.id ===
+            button.dataset.deletePlayer
+        );
 
         if (!player) return;
 
@@ -1003,96 +589,143 @@ async function loadAdminPlayers() {
 
         if (!confirmar) return;
 
-        const { error } =
-          await db
-            .from("players")
-            .delete()
-            .eq("id", player.id);
+        const { error } = await db
+          .from("players")
+          .delete()
+          .eq("id", player.id);
 
         if (error) {
           alert(error.message);
           return;
         }
 
-        await loadAdminPlayers();
-
+        loadAdminPlayers()
         loadPlayerTeamOptions();
-
       }
     );
+  });
+
+  // BOTÓN EDITAR JUGADOR
+  el.querySelectorAll("[data-edit-player]").forEach((button) => {
+
+    button.addEventListener("click", () => {
+
+      const player = data.find(
+        (item) =>
+          item.id === button.dataset.editPlayer
+      );
+
+      if (!player) return;
+
+      $("#playerCategory").value =
+        player.category;
+
+      loadPlayerTeamOptions().then(() => {
+        $("#playerTeam").value =
+          player.team_name;
+      });
+
+      $("#playerName").value =
+        player.name;
+
+      $("#playerNumber").value =
+        player.number ?? "";
+
+      $("#playerForm").dataset.editingId =
+        player.id;
+
+      $("#playerMsg").textContent =
+        "Editando jugador: " +
+        player.name;
+
+      const submitButton =
+        $("#playerForm").querySelector(
+          'button[type="submit"]'
+        );
+
+      if (submitButton) {
+        submitButton.textContent =
+          "Actualizar jugador";
+      }
+
+      window.scrollTo({
+        top: 0,
+        behavior: "smooth"
+      });
+
+    });
 
   });
 
-  /* =========================
-     EDITAR JUGADOR
-  ========================= */
+}  
+/* =========================
+   PARTIDOS
+========================= */
 
-  el.querySelectorAll(
-    "[data-edit-player]"
-  ).forEach((button) => {
+$("#gameForm").addEventListener("submit", async (e) => {
 
-    button.addEventListener(
-      "click",
-      () => {
+  e.preventDefault();
 
-        const player =
-          players.find(
-            (item) =>
-              String(item.id) ===
-              String(
-                button.dataset.editPlayer
-              )
-          );
+  if (!db) {
+    $("#gameMsg").textContent =
+      "Conecta Supabase primero.";
+    return;
+  }
 
-        if (!player) return;
+  const payload = {
+    category: $("#gameCategory").value,
+    game_date: new Date(
+      $("#gameDate").value
+    ).toISOString(),
 
-        $("#playerCategory").value =
-          player.category;
+    home_team: $("#homeTeam").value.trim(),
+    away_team: $("#awayTeam").value.trim(),
 
-        loadPlayerTeamOptions().then(() => {
+    venue: $("#venue").value.trim(),
 
-          $("#playerTeam").value =
-            player.team_name;
+    status: $("#gameStatus").value,
 
-        });
+   home_score: Number($("#homeScore").value) || 0,
+  away_score: Number($("#awayScore").value) || 0
+  };
 
-        $("#playerName").value =
-          player.name;
+  let error;
 
-        $("#playerNumber").value =
-          player.number ?? "";
+const editingId = e.target.dataset.editingId;
 
-        $("#playerForm").dataset.editingId =
-          player.id;
+if (editingId) {
+  const result = await db
+    .from("games")
+    .update(payload)
+    .eq("id", editingId);
 
-        $("#playerMsg").textContent =
-          "Editando jugador: " +
-          player.name;
+  error = result.error;
+} else {
+  const result = await db
+    .from("games")
+    .insert(payload);
 
-        const submitButton =
-          $("#playerForm").querySelector(
-            'button[type="submit"]'
-          );
-
-        if (submitButton) {
-
-          submitButton.textContent =
-            "Actualizar jugador";
-
-        }
-
-      }
-    );
-
-  });
-
+  error = result.error;
 }
+  $("#gameMsg").textContent =
+    error
+      ? error.message
+      : "Partido guardado correctamente.";
+
+  if (!error) {
+    e.target.reset();
+    delete e.target.dataset.editingId;
+    loadAdminGames();
+  }
+
+});
+
 
 /* =========================
    CARGAR PARTIDOS
 ========================= */
 
-async function loadAdminGamesOld() {
+async function loadAdminGames() {
   if (!db) return;
 
   const { data, error } = await db
@@ -1375,7 +1008,6 @@ updateScoreBox();
   });
 
 }
-
 /* =========================
    CAMBIAR ESTADO
 ========================= */
