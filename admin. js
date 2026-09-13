@@ -463,6 +463,8 @@ loadAdminPlayers();
 
   }
 );
+
+
 /* CARGAR JUGADORES */
 
 async function loadAdminPlayers() {
@@ -493,78 +495,80 @@ async function loadAdminPlayers() {
 
   const grupos = {};
 
-  data.forEach((player) => {
-    if (!grupos[player.category]) {
-      grupos[player.category] = {};
-    }
+data.forEach((player) => {
+  if (!grupos[player.category]) {
+    grupos[player.category] = {};
+  }
 
-    if (!grupos[player.category][player.team_name]) {
-      grupos[player.category][player.team_name] = [];
-    }
+  if (!grupos[player.category][player.team_name]) {
+    grupos[player.category][player.team_name] = [];
+  }
 
-    grupos[player.category][player.team_name].push(player);
-  });
+  grupos[player.category][player.team_name].push(player);
+});
 
-  el.innerHTML = Object.entries(grupos)
-    .map(([category, teams]) => `
-      <div class="player-category-group">
+el.innerHTML = Object.entries(grupos)
+  .map(([category, teams]) => `
+    <div class="player-category-group">
 
-        <h3>🏀 ${esc(category)}</h3>
+      <h3>🏀 ${esc(category)}</h3>
 
-        ${Object.entries(teams)
-          .map(([teamName, players]) => `
-            <div class="player-team-group">
+      ${Object.entries(teams)
+        .map(([teamName, players]) => `
+          <div class="player-team-group">
 
-              <h4>🏆 ${esc(teamName)}</h4>
+            <h4>🏆 ${esc(teamName)}</h4>
 
-              ${players
-                .map((player) => `
-                  <div class="admin-game">
+            ${players
+              .map((player) => `
+                <div class="admin-game">
 
-                    <div>
-                      <span class="tag">
-                        ${esc(player.category)}
-                      </span>
+                  <div>
 
-                      <b>${esc(player.name)}</b>
+                    <span class="tag">
+                      ${esc(player.category)}
+                    </span>
 
-                      <small>
-                        ${esc(player.team_name)}
-                        ${
-                          player.number !== null
-                            ? " · N° " + esc(player.number)
-                            : ""
-                        }
-                      </small>
-                    </div>
+                    <b>${esc(player.name)}</b>
 
-                    <div class="admin-actions">
-
-                      <button
-                        class="small-btn"
-                        data-edit-player="${esc(player.id)}">
-                        ✏️ Editar
-                      </button>
-
-                      <button
-                        class="small-btn"
-                        data-delete-player="${esc(player.id)}">
-                        🗑️ Eliminar
-                      </button>
-
-                    </div>
+                    <small>
+                      ${esc(player.team_name)}
+                      ${
+                        player.number !== null
+                          ? " · N° " + esc(player.number)
+                          : ""
+                      }
+                    </small>
 
                   </div>
-                `)
-                .join("")}
 
-            </div>
-          `)
-          .join("")}
+                  <div class="admin-actions">
 
-      </div>
-    `)
-    .join("");
+                    <button
+                      class="small-btn"
+                      data-edit-player="${esc(player.id)}">
+                      ✏️ Editar
+                    </button>
+
+                    <button
+                      class="small-btn"
+                      data-delete-player="${esc(player.id)}">
+                      🗑️ Eliminar
+                    </button>
+
+                  </div>
+
+                </div>
+              `)
+              .join("")}
+
+          </div>
+        `)
+        .join("")}
+
+    </div>
+  `)
+  .join("");
 
 
   el.querySelectorAll(
@@ -605,59 +609,62 @@ async function loadAdminPlayers() {
     );
   });
 
-  // BOTÓN EDITAR JUGADOR
-  el.querySelectorAll("[data-edit-player]").forEach((button) => {
 
-    button.addEventListener("click", () => {
+// BOTÓN EDITAR JUGADOR
+el.querySelectorAll("[data-edit-player]").forEach((button) => {
 
-      const player = data.find(
-        (item) =>
-          item.id === button.dataset.editPlayer
+  button.addEventListener("click", () => {
+
+    const player = data.find(
+      (item) =>
+        item.id === button.dataset.editPlayer
+    );
+
+    if (!player) return;
+
+    $("#playerCategory").value =
+      player.category;
+
+    loadPlayerTeamOptions().then(() => {
+      $("#playerTeam").value =
+        player.team_name;
+    });
+
+    $("#playerName").value =
+      player.name;
+
+    $("#playerNumber").value =
+      player.number ?? "";
+
+    $("#playerForm").dataset.editingId =
+      player.id;
+
+    $("#playerMsg").textContent =
+      "Editando jugador: " +
+      player.name;
+
+    const submitButton =
+      $("#playerForm").querySelector(
+        'button[type="submit"]'
       );
 
-      if (!player) return;
+    if (submitButton) {
+      submitButton.textContent =
+        "Actualizar jugador";
+    }
 
-      $("#playerCategory").value =
-        player.category;
-
-      loadPlayerTeamOptions().then(() => {
-        $("#playerTeam").value =
-          player.team_name;
-      });
-
-      $("#playerName").value =
-        player.name;
-
-      $("#playerNumber").value =
-        player.number ?? "";
-
-      $("#playerForm").dataset.editingId =
-        player.id;
-
-      $("#playerMsg").textContent =
-        "Editando jugador: " +
-        player.name;
-
-      const submitButton =
-        $("#playerForm").querySelector(
-          'button[type="submit"]'
-        );
-
-      if (submitButton) {
-        submitButton.textContent =
-          "Actualizar jugador";
-      }
-
-      window.scrollTo({
-        top: 0,
-        behavior: "smooth"
-      });
-
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth"
     });
 
   });
 
-}  
+});
+
+}
+
+
 /* =========================
    PARTIDOS
 ========================= */
@@ -686,7 +693,7 @@ $("#gameForm").addEventListener("submit", async (e) => {
     status: $("#gameStatus").value,
 
    home_score: Number($("#homeScore").value) || 0,
-  away_score: Number($("#awayScore").value) || 0
+away_score: Number($("#awayScore").value) || 0
   };
 
   let error;
@@ -1008,6 +1015,7 @@ updateScoreBox();
   });
 
 }
+
 /* =========================
    CAMBIAR ESTADO
 ========================= */
@@ -1137,8 +1145,11 @@ async function loadGameTeamOptions() {
       "ERROR JAVASCRIPT: " + error.message;
   }
 }
+
 $("#gameCategory").addEventListener("change", loadGameTeamOptions);
+
 loadGameTeamOptions();
+
 function updateScoreBox() {
   const scoreBox = $("#scoreBox");
 
@@ -1153,4 +1164,4 @@ function updateScoreBox() {
 
 $("#gameStatus").addEventListener("change", updateScoreBox);
 
-updateScoreBox();
+updateScoreBox();;
