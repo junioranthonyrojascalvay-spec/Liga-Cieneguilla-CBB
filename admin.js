@@ -192,8 +192,192 @@ if (editingId) {
 /* =========================
    CARGAR EQUIPOS
 ========================= */
+let adminTeamsCategory = null;
 
 async function loadAdminTeams() {
+  if (!db) return;
+
+  const el = $("#adminTeams");
+
+  const { data, error } = await db
+    .from("teams")
+    .select("*")
+    .order("category", { ascending: true })
+    .order("name", { ascending: true });
+
+  if (error) {
+    el.innerHTML =
+      '<div class="empty">Error cargando equipos.</div>';
+    console.error(error);
+    return;
+  }
+
+  if (!data || !data.length) {
+    el.innerHTML =
+      '<div class="empty">Aún no hay equipos registrados.</div>';
+    return;
+  }
+
+  const categorias = [
+    "U13 Varones",
+    "U16 Varones",
+    "U18 Varones",
+    "U23 Varones",
+    "Primera División",
+    "Segunda División",
+    "U13 Damas",
+    "U16 Damas",
+    "U18 Damas"
+  ];
+
+  if (!adminTeamsCategory) {
+    el.innerHTML = `
+      <div style="display:flex;flex-direction:column;gap:8px;">
+        ${categorias.map((cat) => `
+          <button
+            type="button"
+            class="small-btn"
+            data-team-category="${esc(cat)}"
+            style="width:100%;text-align:left;padding:12px;">
+            ${esc(cat)}
+          </button>
+        `).join("")}
+      </div>
+    `;
+
+    el.querySelectorAll("[data-team-category]").forEach((button) => {
+      button.addEventListener("click", () => {
+        adminTeamsCategory = button.dataset.teamCategory;
+        loadAdminTeams();
+      });
+    });
+
+    return;
+  }
+
+  const equipos = data.filter(
+    (team) => team.category === adminTeamsCategory
+  );
+
+  el.innerHTML = `
+    <div style="margin-bottom:12px;">
+      <button
+        type="button"
+        class="small-btn"
+        id="backTeamsCategories">
+        ← VOLVER
+      </button>
+    </div>
+
+    <div class="panel-title" style="margin-bottom:12px;">
+      <span>${esc(adminTeamsCategory)}</span>
+    </div>
+
+    ${
+      !equipos.length
+        ? '<div class="empty">Aún no hay equipos en esta categoría.</div>'
+        : equipos.map((team) => {
+            const logo = team.logo_url
+              ? `<img
+                   src="${esc(team.logo_url)}"
+                   alt=""
+                   width="48"
+                   height="48"
+                   style="object-fit:contain;border-radius:8px;">`
+              : "";
+
+            return `
+              <div class="admin-game">
+                <div style="display:flex;align-items:center;gap:12px;">
+                  ${logo}
+
+                  <div style="flex:1;">
+                    <span class="tag">${esc(team.category)}</span>
+                    <div>
+                      <b>${esc(team.name)}</b>
+                    </div>
+                  </div>
+
+                  <div style="display:flex;gap:6px;flex-wrap:wrap;">
+                    <button
+                      class="small-btn"
+                      data-edit-team="${esc(team.id)}">
+                      Editar
+                    </button>
+
+                    <button
+                      class="small-btn"
+                      data-delete-team="${esc(team.id)}">
+                      Eliminar
+                    </button>
+                  </div>
+                </div>
+              </div>
+            `;
+          }).join("")
+    }
+  `;
+
+  $("#backTeamsCategories").addEventListener("click", () => {
+    adminTeamsCategory = null;
+    loadAdminTeams();
+  });
+
+  el.querySelectorAll("[data-edit-team]").forEach((button) => {
+    button.addEventListener("click", () => {
+      const team = data.find(
+        (item) => item.id === button.dataset.editTeam
+      );
+
+      if (!team) return;
+
+      $("#teamCategory").value = team.category;
+      $("#teamName").value = team.name;
+      $("#teamLogoUrl").value = team.logo_url || "";
+
+      $("#teamForm").dataset.editingId = team.id;
+
+      const submitButton =
+        $("#teamForm").querySelector('button[type="submit"]');
+
+      if (submitButton) {
+        submitButton.textContent = "Actualizar equipo";
+      }
+
+      $("#teamMsg").textContent =
+        "Editando: " + team.name;
+    });
+  });
+
+  el.querySelectorAll("[data-delete-team]").forEach((button) => {
+    button.addEventListener("click", async () => {
+      const team = data.find(
+        (item) => item.id === button.dataset.deleteTeam
+      );
+
+      if (!team) return;
+
+      const confirmar = confirm(
+        `¿Eliminar el equipo "${team.name}"?`
+      );
+
+      if (!confirmar) return;
+
+      const { error } = await db
+        .from("teams")
+        .delete()
+        .eq("id", team.id);
+
+      if (error) {
+        alert(error.message);
+        return;
+      }
+
+      loadAdminTeams();
+    });
+  });
+}
+async function loadAdminTeamsOld() {
   if (!db) return;
 
   const el = $("#adminTeams");
